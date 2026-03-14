@@ -29,7 +29,7 @@ const features = [
   {
     icon: Users,
     title: 'Any language',
-    desc: 'Speak in English, Spanish, Punjabi — TradePass understands.',
+    desc: 'Speak in English, Spanish, Punjabi — WiseHire understands.',
   },
 ]
 

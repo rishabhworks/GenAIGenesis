@@ -1,13 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities; 
+@import "tailwindcss";
 
-:root {
-  --font-display: 'Syne', sans-serif;
-  --font-body: 'DM Sans', sans-serif;
-
+@theme {
   --color-bg: #0A0A0F;
   --color-surface: #111118;
   --color-border: #1E1E2E;
@@ -18,6 +13,8 @@
   --color-text-primary: #F4F4F5;
   --color-text-secondary: #A1A1AA;
   --color-text-muted: #52525B;
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
 }
 
 * {
