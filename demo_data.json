@@ -1,0 +1,128 @@
+{
+  "workers": [
+    {
+      "worker_id": "worker-001",
+      "profile": {
+        "name": "Carlos Rodriguez",
+        "email": "carlos.rodriguez@email.com",
+        "phone": "416-555-0101",
+        "trade": "Electrician",
+        "years_experience": 8,
+        "certifications": ["Red Seal Electrician", "OSHA Safety Certified"],
+        "specialties": ["Residential Wiring", "Commercial Systems", "Solar Installation"],
+        "location": "Mississauga, ON",
+        "latitude": 43.5890,
+        "longitude": -79.6441,
+        "availability": "Full-time",
+        "hourly_rate_expectation": 48.00,
+        "skills_summary": "Experienced electrician specializing in residential and commercial electrical systems with expertise in wiring, panel installation, and solar integration. Red Seal certified with 8 years of hands-on experience."
+      },
+      "matched_jobs": [
+        {
+          "job_id": "job-001",
+          "job_title": "Residential Electrician",
+          "company": "BrightWire Co.",
+          "location": "Mississauga, ON",
+          "hourly_rate": 47.50,
+          "match_score": 95,
+          "work_experience_required": {
+            "electrician": "2+ years",
+            "residential": "1+ year"
+          },
+          "certifications_required": ["Red Seal Electrician"]
+        },
+        {
+          "job_id": "job-002",
+          "job_title": "Senior Commercial Electrician",
+          "company": "ElectroWorks Solutions",
+          "location": "Toronto, ON",
+          "hourly_rate": 52.00,
+          "match_score": 88,
+          "work_experience_required": {
+            "electrician": "5+ years",
+            "commercial": "3+ years"
+          },
+          "certifications_required": ["Red Seal Electrician", "OSHA Safety"]
+        }
+      ]
+    },
+    {
+      "worker_id": "worker-002",
+      "profile": {
+        "name": "Maria Chen",
+        "email": "maria.chen@email.com",
+        "phone": "416-555-0202",
+        "trade": "Plumber",
+        "years_experience": 12,
+        "certifications": ["Red Seal Plumber", "Backflow Certification", "Gas Fitter License"],
+        "specialties": ["Residential Plumbing", "Commercial Systems", "Drain Cleaning", "Gas Line Installation"],
+        "location": "Toronto, ON",
+        "latitude": 43.6629,
+        "longitude": -79.3957,
+        "availability": "Full-time",
+        "hourly_rate_expectation": 55.00,
+        "skills_summary": "Master plumber with 12 years of experience in residential and commercial plumbing, specializing in complex system design, maintenance, and emergency repairs. Certified for gas line installation and backflow prevention."
+      },
+      "matched_jobs": [
+        {
+          "job_id": "job-003",
+          "job_title": "Master Plumber",
+          "company": "AquaFlow Plumbing",
+          "location": "Toronto, ON",
+          "hourly_rate": 56.00,
+          "match_score": 97,
+          "work_experience_required": {
+            "plumber": "10+ years",
+            "commercial": "5+ years"
+          },
+          "certifications_required": ["Red Seal Plumber", "Backflow Certification"]
+        }
+      ]
+    },
+    {
+      "worker_id": "worker-003",
+      "profile": {
+        "name": "David Thompson",
+        "email": "david.thompson@email.com",
+        "phone": "905-555-0303",
+        "trade": "HVAC Technician",
+        "years_experience": 6,
+        "certifications": ["HVAC Certification", "EPA Certified", "Gas Furnace Certified"],
+        "specialties": ["Heating Systems", "Air Conditioning", "Heat Pump Installation", "Commercial HVAC"],
+        "location": "Brampton, ON",
+        "latitude": 43.7315,
+        "longitude": -79.7624,
+        "availability": "Part-time",
+        "hourly_rate_expectation": 45.00,
+        "skills_summary": "Certified HVAC technician with 6 years of experience in residential and light commercial systems. Proficient in system diagnosis, installation, maintenance, and repair with EPA certification for refrigerant handling."
+      },
+      "matched_jobs": [
+        {
+          "job_id": "job-004",
+          "job_title": "HVAC Field Technician",
+          "company": "ComfortClimate Inc.",
+          "location": "Mississauga, ON",
+          "hourly_rate": 44.00,
+          "match_score": 90,
+          "work_experience_required": {
+            "hvac": "5+ years"
+          },
+          "certifications_required": ["HVAC Certification", "EPA Certified"]
+        },
+        {
+          "job_id": "job-005",
+          "job_title": "Senior HVAC Technician",
+          "company": "TemperaturePro",
+          "location": "Toronto, ON",
+          "hourly_rate": 52.00,
+          "match_score": 82,
+          "work_experience_required": {
+            "hvac": "8+ years",
+            "commercial": "3+ years"
+          },
+          "certifications_required": ["HVAC Certification", "EPA Certified", "Gas Furnace Certified"]
+        }
+      ]
+    }
+  ]
+}
