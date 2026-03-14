@@ -30,7 +30,7 @@ class Settings:
     STATS_CANADA_API_KEY = os.getenv("STATS_CANADA_API_KEY", "")
     
     # API Settings
-    CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:5173,http://localhost:8000").split(",")
+    CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:3001,http://localhost:5173,http://localhost:8000").split(",")
     MAX_UPLOAD_SIZE = 25 * 1024 * 1024  # 25MB
     
     # Wage Fairness Detection

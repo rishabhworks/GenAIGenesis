@@ -47,6 +47,35 @@ export const chatbotAPI = {
       throw error;
     }
   },
+
+  // Check pay fairness using Moorcheh AI
+  checkPayFairness: async (trade, hourlyRate, location = 'Canada') => {
+    try {
+      const response = await apiClient.post('/chatbot/check-pay', {
+        trade: trade,
+        hourly_rate: hourlyRate,
+        location: location,
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error checking pay fairness:', error);
+      throw error;
+    }
+  },
+
+  // Explain contract using Moorcheh AI
+  explainContract: async (contractText, language = 'simple') => {
+    try {
+      const response = await apiClient.post('/chatbot/explain-contract', {
+        contract_text: contractText,
+        language: language,
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error explaining contract:', error);
+      throw error;
+    }
+  },
 };
 
 export default apiClient;

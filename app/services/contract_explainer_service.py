@@ -1,15 +1,15 @@
 import logging
-from app.services.ai_service import AIService
+from app.services.moorcheh_service import MoorchehRAGService
 from app.schemas.job_schema import ContractExplanationResponse
 
 logger = logging.getLogger(__name__)
 
 class ContractExplainerService:
-    """Service for explaining employment contracts in simple language"""
+    """Service for explaining employment contracts using Moorcheh AI"""
     
     def __init__(self):
-        """Initialize contract explainer service"""
-        self.ai_service = AIService()
+        """Initialize contract explainer service with Moorcheh"""
+        self.moorcheh_service = MoorchehRAGService()
     
     def explain_contract(
         self,
@@ -17,14 +17,7 @@ class ContractExplainerService:
         language_level: str = "simple"
     ) -> ContractExplanationResponse:
         """
-        Explain contract clause in simple language
-        
-        Args:
-            contract_text: Contract clause or full contract text
-            language_level: "simple", "intermediate", or "detailed"
-        
-        Returns:
-            ContractExplanationResponse with explanation, key points, and risks
+        Explain contract clause in simple language using Moorcheh AI
         """
         try:
             if not contract_text or len(contract_text.strip()) == 0:
@@ -37,8 +30,8 @@ class ContractExplainerService:
                     recommendations=[]
                 )
             
-            # Use AI service to explain
-            explanation = self.ai_service.explain_contract(
+            # Use Moorcheh AI (Direct AI Mode) to explain
+            explanation = self.moorcheh_service.explain_contract(
                 contract_text=contract_text,
                 language_level=language_level
             )

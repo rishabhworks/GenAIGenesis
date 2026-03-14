@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import ChatBot from './components/ChatBot';
 import Recommendations from './components/Recommendations';
 import WorkerSearch from './components/WorkerSearch';
+import PayCheck from './components/PayCheck';
+import ContractExplainer from './components/ContractExplainer';
 import './App.css';
 
 function App() {
@@ -100,12 +102,26 @@ function App() {
         >
           🔍 Search Workers
         </button>
+        <button
+          className={`nav-item ${activeTab === 'paycheck' ? 'active' : ''}`}
+          onClick={() => setActiveTab('paycheck')}
+        >
+          💰 Pay Check
+        </button>
+        <button
+          className={`nav-item ${activeTab === 'contracts' ? 'active' : ''}`}
+          onClick={() => setActiveTab('contracts')}
+        >
+          📋 Contracts
+        </button>
       </nav>
 
       <main className="app-content">
         {activeTab === 'chat' && <ChatBot workerId={workerId} />}
         {activeTab === 'recommendations' && <Recommendations workerId={workerId} />}
         {activeTab === 'search' && <WorkerSearch />}
+        {activeTab === 'paycheck' && <PayCheck />}
+        {activeTab === 'contracts' && <ContractExplainer />}
       </main>
 
       <footer className="app-footer">

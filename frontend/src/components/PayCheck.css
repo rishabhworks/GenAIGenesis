@@ -1,0 +1,180 @@
+.paycheck-container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.paycheck-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.paycheck-header h2 {
+  font-size: 1.8rem;
+  margin-bottom: 8px;
+}
+
+.paycheck-header p {
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.powered-by {
+  font-size: 0.75rem;
+  color: #999;
+  font-style: italic;
+}
+
+.paycheck-form {
+  background: #f8f9fa;
+  padding: 24px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #333;
+}
+
+.form-group select,
+.form-group input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+}
+
+.rate-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rate-input .currency {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.rate-input input {
+  flex: 1;
+}
+
+.rate-input .per-hour {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.check-button {
+  width: 100%;
+  padding: 12px;
+  background: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.check-button:hover {
+  background: #1976D2;
+}
+
+.check-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.result-card {
+  background: white;
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.result-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.status-icon {
+  font-size: 2rem;
+}
+
+.result-header h3 {
+  font-size: 1.3rem;
+  margin: 0;
+}
+
+.result-details {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-row .label {
+  font-weight: 600;
+  color: #555;
+}
+
+.detail-row .value {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.recommendation {
+  padding: 12px;
+  background: #f0f7ff;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.recommendation p {
+  margin: 0;
+  color: #333;
+  line-height: 1.5;
+}
+
+.alert-banner {
+  background: #ffeef0;
+  border: 1px solid #e74c3c;
+  border-radius: 8px;
+  padding: 12px;
+  color: #c0392b;
+  font-size: 0.9rem;
+}
+
+.error-message {
+  background: #ffeef0;
+  border: 1px solid #e74c3c;
+  border-radius: 8px;
+  padding: 12px;
+  color: #c0392b;
+  margin-bottom: 16px;
+}

@@ -2,14 +2,14 @@ import logging
 from typing import Dict
 from sqlalchemy.orm import Session
 from app.models.job import Job
+from app.services.moorcheh_service import MoorchehRAGService
 
 logger = logging.getLogger(__name__)
 
 class PayFairnessService:
-    """Service for detecting underpaid job postings"""
+    """Service for detecting underpaid job postings using Moorcheh AI + wage-data namespace"""
     
-    # Typical market wages for different trades in Canada (hourly rates)
-    # This should be updated with real data from Statistics Canada or labor surveys
+    # Fallback market wages in case Moorcheh wage-data namespace is empty
     MARKET_WAGE_DATA = {
         "electrician": 32.50,
         "plumber": 34.00,
@@ -27,32 +27,23 @@ class PayFairnessService:
         "general contractor": 35.00,
         "mechanic": 31.00,
     }
+
+    _moorcheh_service = None
+
+    @classmethod
+    def _get_moorcheh(cls):
+        if cls._moorcheh_service is None:
+            cls._moorcheh_service = MoorchehRAGService()
+        return cls._moorcheh_service
     
     @staticmethod
     def get_market_rate(trade: str, location: str = "Canada") -> float:
-        """
-        Get market wage for a trade
-        
-        Args:
-            trade: Trade type
-            location: Location (for future integration with regional data)
-        
-        Returns:
-            Market hourly rate in CAD
-        """
         trade_lower = trade.lower()
-        
-        # Direct match
         if trade_lower in PayFairnessService.MARKET_WAGE_DATA:
             return PayFairnessService.MARKET_WAGE_DATA[trade_lower]
-        
-        # Partial match
         for market_trade, rate in PayFairnessService.MARKET_WAGE_DATA.items():
             if trade_lower in market_trade or market_trade in trade_lower:
                 return rate
-        
-        # Default to general trades if no match
-        logger.warning(f"Trade '{trade}' not in market data, using default")
         return 28.00
     
     @staticmethod
@@ -61,55 +52,70 @@ class PayFairnessService:
         job_id: str,
         wage_threshold_percentage: float = 20
     ) -> Dict:
-        """
-        Analyze if a job is underpaid compared to market rate
-        
-        Args:
-            db: Database session
-            job_id: Job ID to analyze
-            wage_threshold_percentage: Alert if pay is X% below market
-        
-        Returns:
-            dict with fairness analysis
-        """
+        """Analyze if a job is underpaid using Moorcheh AI with wage-data namespace"""
         try:
-            # Get job
             job = db.query(Job).filter(Job.id == job_id).first()
             if not job:
-                logger.warning(f"Job not found: {job_id}")
-                return {
-                    "status": "not_found",
-                    "alert": False
-                }
+                return {"status": "not_found", "alert": False}
             
-            # Get market rate
+            moorcheh = PayFairnessService._get_moorcheh()
+            
+            if moorcheh.client:
+                # Use Moorcheh AI to analyze pay fairness against wage-data namespace
+                result = moorcheh.analyze_pay_fairness(
+                    trade=job.trade,
+                    hourly_rate=job.hourly_rate,
+                    location=job.location or "Canada"
+                )
+                
+                market_rate = result.get("market_rate", 0)
+                status = result.get("status", "unknown")
+                alert = result.get("alert", False)
+                recommendation = result.get("recommendation", "")
+                
+                if market_rate > 0:
+                    job.market_rate = market_rate
+                    job.pay_fairness_status = status
+                    db.add(job)
+                    db.commit()
+                    
+                    difference = job.hourly_rate - market_rate
+                    difference_pct = (difference / market_rate) * 100 if market_rate > 0 else 0
+                    
+                    return {
+                        "job_id": job_id,
+                        "hourly_rate": job.hourly_rate,
+                        "market_rate": market_rate,
+                        "difference": difference,
+                        "difference_percentage": difference_pct,
+                        "status": status,
+                        "alert": alert,
+                        "recommendation": recommendation
+                    }
+            
+            # Fallback to static data if Moorcheh unavailable or returned no market_rate
             market_rate = PayFairnessService.get_market_rate(job.trade, job.location)
-            
-            # Store market rate in job
             job.market_rate = market_rate
             
-            # Calculate difference
-            salary_to_check = job.hourly_rate
-            difference = salary_to_check - market_rate
-            difference_percentage = (difference / market_rate) * 100 if market_rate > 0 else 0
+            difference = job.hourly_rate - market_rate
+            difference_pct = (difference / market_rate) * 100 if market_rate > 0 else 0
             
-            # Determine status
-            if difference_percentage < -wage_threshold_percentage:
+            if difference_pct < -wage_threshold_percentage:
                 status = "underpaid"
                 alert = True
-                recommendation = f"This job pays {abs(difference_percentage):.1f}% below market rate. Consider negotiating or looking for better offers."
-            elif difference_percentage < 0:
+                recommendation = f"This job pays {abs(difference_pct):.1f}% below market rate. Consider negotiating or looking for better offers."
+            elif difference_pct < 0:
                 status = "slightly_underpaid"
                 alert = False
-                recommendation = f"This job pays {abs(difference_percentage):.1f}% below market average, but might be acceptable if benefits are good."
-            elif difference_percentage <= 10:
+                recommendation = f"This job pays {abs(difference_pct):.1f}% below market average."
+            elif difference_pct <= 10:
                 status = "fair"
                 alert = False
                 recommendation = "This job offers a fair market rate."
             else:
                 status = "competitive"
                 alert = False
-                recommendation = f"Excellent! This job pays {difference_percentage:.1f}% above market rate."
+                recommendation = f"This job pays {difference_pct:.1f}% above market rate."
             
             job.pay_fairness_status = status
             db.add(job)
@@ -117,10 +123,10 @@ class PayFairnessService:
             
             return {
                 "job_id": job_id,
-                "hourly_rate": salary_to_check,
+                "hourly_rate": job.hourly_rate,
                 "market_rate": market_rate,
                 "difference": difference,
-                "difference_percentage": difference_percentage,
+                "difference_percentage": difference_pct,
                 "status": status,
                 "alert": alert,
                 "recommendation": recommendation
@@ -131,23 +137,9 @@ class PayFairnessService:
             raise
     
     @staticmethod
-    def batch_analyze_jobs(
-        db: Session,
-        wage_threshold_percentage: float = 20
-    ) -> Dict:
-        """
-        Analyze all jobs in database for pay fairness
-        
-        Args:
-            db: Database session
-            wage_threshold_percentage: Alert threshold
-        
-        Returns:
-            Analysis summary
-        """
+    def batch_analyze_jobs(db: Session, wage_threshold_percentage: float = 20) -> Dict:
         try:
             jobs = db.query(Job).filter(Job.is_active == True).all()
-            
             fairness_analysis = {
                 "total_jobs": len(jobs),
                 "underpaid": 0,
@@ -155,26 +147,18 @@ class PayFairnessService:
                 "competitive": 0,
                 "jobs_analyzed": []
             }
-            
             for job in jobs:
-                analysis = PayFairnessService.analyze_pay_fairness(
-                    db, job.id, wage_threshold_percentage
-                )
-                
+                analysis = PayFairnessService.analyze_pay_fairness(db, job.id, wage_threshold_percentage)
                 if analysis['status'] == "underpaid":
                     fairness_analysis["underpaid"] += 1
                     fairness_analysis["jobs_analyzed"].append({
-                        "job_id": job.id,
-                        "title": job.title,
-                        "alert": True
+                        "job_id": job.id, "title": job.title, "alert": True
                     })
-                elif analysis['status'] == "fair":
+                elif analysis['status'] in ("fair", "slightly_underpaid"):
                     fairness_analysis["fair"] += 1
                 else:
                     fairness_analysis["competitive"] += 1
-            
             return fairness_analysis
-            
         except Exception as e:
             logger.error(f"Batch pay fairness analysis failed: {e}")
             raise

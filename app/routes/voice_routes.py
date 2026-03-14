@@ -8,6 +8,7 @@ from app.schemas.worker_schema import WorkerCreate, WorkerResponse, WorkerProfil
 from app.models.worker import Worker
 from app.services.voice_service import VoiceService
 from app.services.ai_service import AIService
+from app.services.moorcheh_service import MoorchehRAGService
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/workers", tags=["workers"])
@@ -15,6 +16,7 @@ router = APIRouter(prefix="/api/v1/workers", tags=["workers"])
 # Initialize services
 voice_service = VoiceService()
 ai_service = AIService()
+rag_service = MoorchehRAGService()
 
 @router.post("/voice-profile", response_model=WorkerResponse)
 async def create_worker_from_voice(
@@ -22,31 +24,48 @@ async def create_worker_from_voice(
     db: Session = Depends(get_db)
 ):
     """
-    Create worker profile from voice recording
-    
-    - **file**: Audio file (wav, mp3, flac, opus, webm)
-    Returns: Worker profile with extracted information
+    Create worker profile from voice recording.
+    Uses Gemini for speech-to-text, then Moorcheh AI for profile extraction,
+    and auto-uploads the profile to Moorcheh knowledge base.
     """
     try:
-        # Save uploaded file temporarily
-        temp_file_path = f"/tmp/{uuid.uuid4()}.{file.filename.split('.')[-1]}"
-        
-        with open(temp_file_path, "wb") as f:
+        import tempfile
+        from pathlib import Path
+
+        suffix = f".{file.filename.split('.')[-1]}" if file.filename else ".wav"
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as temp_file:
             content = await file.read()
-            f.write(content)
-        
-        # Transcribe audio
-        transcription = await voice_service.transcribe_from_file(temp_file_path)
-        
+            temp_file.write(content)
+            temp_path = temp_file.name
+
+        # Step 1: Transcribe audio (Gemini - needed for audio processing)
+        transcription = await voice_service.transcribe_from_file(temp_path)
+        Path(temp_path).unlink(missing_ok=True)
+
         if transcription['status'] != 'success':
             raise HTTPException(status_code=400, detail="Failed to transcribe audio")
-        
+
         transcript = transcription['transcript']
-        
-        # Extract worker profile using AI
-        profile = ai_service.extract_worker_profile(transcript)
-        
-        # Create worker record
+
+        # Step 2: Extract profile using Moorcheh AI (Direct AI Mode)
+        moorcheh_profile = rag_service.extract_profile_from_transcript(transcript)
+
+        if moorcheh_profile:
+            profile = WorkerProfileResponse(
+                trade=moorcheh_profile.get("trade", "General Trades"),
+                experience_years=moorcheh_profile.get("experience_years", 0),
+                certifications=moorcheh_profile.get("certifications", []),
+                specialties=moorcheh_profile.get("specialties", []),
+                location=moorcheh_profile.get("location", "Canada"),
+                availability=moorcheh_profile.get("availability", "Full-time"),
+                summary=moorcheh_profile.get("summary", transcript[:100]),
+                confidence_score=moorcheh_profile.get("confidence_score", 0.8)
+            )
+        else:
+            # Fallback to Gemini extraction
+            profile = ai_service.extract_worker_profile(transcript)
+
+        # Step 3: Create worker record in DB
         worker_id = str(uuid.uuid4())
         worker = Worker(
             id=worker_id,
@@ -59,15 +78,27 @@ async def create_worker_from_voice(
             profile_summary=profile.summary,
             availability=profile.availability
         )
-        
         db.add(worker)
         db.commit()
         db.refresh(worker)
-        
-        logger.info(f"Worker profile created: {worker_id}")
-        
+
+        # Step 4: Auto-upload to Moorcheh knowledge base
+        rag_service.upload_user_profile_to_knowledge_base(worker_id, {
+            "name": f"Worker {worker_id[:8]}",
+            "trade": profile.trade,
+            "experience_years": profile.experience_years,
+            "certifications": profile.certifications,
+            "specialties": profile.specialties,
+            "location": profile.location,
+            "availability": profile.availability,
+            "hourly_rate_expectation": 0
+        })
+
+        logger.info(f"Voice profile created & uploaded to Moorcheh: {worker_id}")
         return worker
-        
+
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Voice profile creation failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -77,11 +108,7 @@ async def create_worker_manual(
     worker_data: WorkerCreate,
     db: Session = Depends(get_db)
 ):
-    """
-    Manually create worker profile (without voice)
-    
-    Useful for testing or manual data entry
-    """
+    """Create worker profile manually and auto-upload to Moorcheh"""
     try:
         worker_id = str(uuid.uuid4())
         worker = Worker(
@@ -97,14 +124,25 @@ async def create_worker_manual(
             availability=worker_data.availability,
             hourly_rate_expectation=worker_data.hourly_rate_expectation
         )
-        
         db.add(worker)
         db.commit()
         db.refresh(worker)
-        
-        logger.info(f"Manual worker profile created: {worker_id}")
+
+        # Auto-upload to Moorcheh knowledge base
+        rag_service.upload_user_profile_to_knowledge_base(worker_id, {
+            "name": f"Worker {worker_id[:8]}",
+            "trade": worker_data.trade,
+            "experience_years": worker_data.experience_years,
+            "certifications": worker_data.certifications or [],
+            "specialties": worker_data.specialties or [],
+            "location": worker_data.location,
+            "availability": worker_data.availability,
+            "hourly_rate_expectation": worker_data.hourly_rate_expectation or 0
+        })
+
+        logger.info(f"Manual profile created & uploaded to Moorcheh: {worker_id}")
         return worker
-        
+
     except Exception as e:
         logger.error(f"Manual profile creation failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
