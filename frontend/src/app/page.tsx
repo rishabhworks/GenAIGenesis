@@ -40,9 +40,9 @@ export default function LandingPage() {
     <main className="min-h-screen bg-bg text-text-primary overflow-hidden">
 
       {/* Nav */}
-      <nav className="flex items-center justify-between px-8 py-6 border-b border-border">
+      <nav className="flex items-center justify-between px-8 py-6 border-b border-[#1E1E2E]">
         <span className="font-display text-xl font-bold tracking-tight">
-          Trade<span className="text-accent">Pass</span>
+          Wise<span className="text-accent">Hire</span>
         </span>
         <button
           onClick={() => router.push('/auth')}
@@ -87,7 +87,7 @@ export default function LandingPage() {
             </button>
             <button
               onClick={() => router.push('/auth')}
-              className="flex items-center gap-2 border border-border hover:border-text-muted text-text-secondary hover:text-text-primary px-8 py-4 rounded-xl transition-all duration-200 text-base"
+              className="flex items-center gap-2 border border-[#1E1E2E] hover:border-[#52525B] text-text-secondary hover:text-text-primary px-8 py-4 rounded-xl transition-all duration-200 text-base"
             >
               See how it works
               <ArrowRight size={16} />
@@ -97,7 +97,7 @@ export default function LandingPage() {
       </section>
 
       {/* Stats */}
-      <section className="border-y border-border py-12 px-6">
+      <section className="border-y border-[#1E1E2E] py-12 px-6">
         <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
           {stats.map((stat, i) => (
             <motion.div
@@ -127,9 +127,9 @@ export default function LandingPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 * i }}
-                className="bg-surface border border-border rounded-2xl p-8 hover:border-accent/40 transition-all duration-300 group"
+                className="bg-[#111118] border border-[#1E1E2E] rounded-2xl p-8 hover:border-orange-500/40 transition-all duration-300 group"
               >
-                <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent/20 transition-colors">
+                <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center mb-4 group-hover:bg-orange-500/20 transition-colors">
                   <f.icon size={20} className="text-accent" />
                 </div>
                 <h3 className="font-display text-lg font-bold mb-2">{f.title}</h3>
@@ -158,8 +158,8 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border px-8 py-6 flex items-center justify-between text-text-muted text-sm">
-        <span className="font-display font-bold">Trade<span className="text-accent">Pass</span></span>
+      <footer className="border-t border-[#1E1E2E] px-8 py-6 flex items-center justify-between text-[#52525B] text-sm">
+        <span className="font-display font-bold">Wise<span className="text-accent">Hire</span></span>
         <span>Built at GenAI Genesis 2026 🇨🇦</span>
       </footer>
 
