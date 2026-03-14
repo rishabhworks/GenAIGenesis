@@ -3,7 +3,10 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MapPin, Briefcase, TrendingUp, TrendingDown, ArrowLeft, AlertTriangle, CheckCircle, Star } from 'lucide-react'
+import {
+  MapPin, Briefcase, TrendingUp, TrendingDown,
+  ArrowLeft, AlertTriangle, CheckCircle, Star,
+} from 'lucide-react'
 import { mockJobs, mockWorker } from '@/mock/carlos'
 import type { Job } from '@/types'
 
@@ -19,6 +22,7 @@ export default function JobsPage() {
   })
 
   const underpaidCount = mockJobs.filter(j => j.underpaid).length
+  const fairCount = mockJobs.filter(j => !j.underpaid).length
 
   return (
     <main className="min-h-screen bg-[#0A0A0F] text-white">
@@ -26,7 +30,7 @@ export default function JobsPage() {
       {/* Nav */}
       <nav className="flex items-center justify-between px-8 py-6 border-b border-[#1E1E2E]">
         <span className="font-display text-xl font-bold">
-          Wise<span className="text-orange-500">Hire</span>
+          Wise<span className="text-[#F97316]">Hire</span>
         </span>
         <button
           onClick={() => router.push('/profile')}
@@ -62,15 +66,21 @@ export default function JobsPage() {
             className="bg-red-500/10 border border-red-500/30 rounded-2xl p-5 mb-6 flex items-start gap-4"
           >
             <div className="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center flex-shrink-0">
-              <AlertTriangle size={20} className="text-red-400" />
+              {/* Pulsing alert icon */}
+              <AlertTriangle
+                size={20}
+                className="text-red-400 animate-alert-pulse"
+              />
             </div>
             <div>
               <h3 className="font-display font-bold text-red-400 mb-1">
                 Pay Alert — {underpaidCount} job{underpaidCount > 1 ? 's' : ''} below market rate
               </h3>
               <p className="text-[#A1A1AA] text-sm leading-relaxed">
-                Based on regional data for <span className="text-white font-medium">{mockWorker.trade}s in {mockWorker.location}</span>,
-                the market median wage is <span className="text-white font-medium">$38/hr</span>.
+                Based on regional data for{' '}
+                <span className="text-white font-medium">{mockWorker.trade}s in {mockWorker.location}</span>,
+                the market median wage is{' '}
+                <span className="text-white font-medium">$38/hr</span>.{' '}
                 {underpaidCount} posting{underpaidCount > 1 ? 's are' : ' is'} offering significantly less.
                 We&apos;ve flagged them below.
               </p>
@@ -79,21 +89,32 @@ export default function JobsPage() {
         )}
 
         {/* Filters */}
-        <div className="flex gap-2 mb-6">
-          {(['all', 'fair', 'underpaid'] as const).map(f => (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="flex gap-2 mb-6"
+        >
+          {(
+            [
+              { key: 'all', label: `All (${mockJobs.length})` },
+              { key: 'fair', label: `Fair Pay (${fairCount})` },
+              { key: 'underpaid', label: `Underpaid (${underpaidCount})` },
+            ] as const
+          ).map(({ key, label }) => (
             <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 capitalize ${
-                filter === f
-                  ? 'bg-orange-500 text-white'
-                  : 'bg-[#111118] border border-[#1E1E2E] text-[#A1A1AA] hover:text-white'
+              key={key}
+              onClick={() => setFilter(key)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                filter === key
+                  ? 'bg-[#F97316] text-white'
+                  : 'bg-[#111118] border border-[#1E1E2E] text-[#A1A1AA] hover:text-white hover:border-[#52525B]'
               }`}
             >
-              {f === 'all' ? `All (${mockJobs.length})` : f === 'fair' ? `Fair Pay (${mockJobs.filter(j => !j.underpaid).length})` : `Underpaid (${underpaidCount})`}
+              {label}
             </button>
           ))}
-        </div>
+        </motion.div>
 
         {/* Job Cards */}
         <div className="space-y-4">
@@ -102,22 +123,22 @@ export default function JobsPage() {
               <motion.div
                 key={job.id}
                 layout
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ delay: i * 0.05 }}
+                exit={{ opacity: 0, scale: 0.96 }}
+                transition={{ delay: i * 0.06, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                 onClick={() => setSelectedJob(job)}
-                className={`bg-[#111118] border rounded-2xl p-6 cursor-pointer transition-all duration-200 hover:scale-[1.01] ${
+                className={`bg-[#111118] border rounded-2xl p-6 cursor-pointer transition-all duration-200 hover:scale-[1.015] hover:-translate-y-0.5 ${
                   job.underpaid
-                    ? 'border-red-500/20 hover:border-red-500/40'
-                    : 'border-[#1E1E2E] hover:border-orange-500/40'
+                    ? 'border-red-500/20 hover:border-red-500/40 hover:shadow-[0_4px_24px_rgba(239,68,68,0.08)]'
+                    : 'border-[#1E1E2E] hover:border-[#F97316]/35 hover:shadow-[0_4px_24px_rgba(249,115,22,0.07)]'
                 }`}
               >
                 <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
 
-                    {/* Top row */}
-                    <div className="flex items-center gap-2 mb-1">
+                    {/* Badges */}
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
                       {job.underpaid ? (
                         <span className="flex items-center gap-1 text-xs text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full">
                           <AlertTriangle size={10} />
@@ -129,7 +150,7 @@ export default function JobsPage() {
                           Fair Pay
                         </span>
                       )}
-                      <span className="flex items-center gap-1 text-xs text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-full">
+                      <span className="flex items-center gap-1 text-xs text-orange-400 bg-[#F97316]/10 border border-[#F97316]/20 px-2 py-0.5 rounded-full">
                         <Star size={10} />
                         {job.fit_score}% match
                       </span>
@@ -152,20 +173,17 @@ export default function JobsPage() {
                     </div>
                   </div>
 
-                  {/* Wage */}
+                  {/* Wage block */}
                   <div className="text-right flex-shrink-0">
                     <p className={`font-display text-2xl font-bold ${job.underpaid ? 'text-red-400' : 'text-green-400'}`}>
                       ${job.posted_wage}/hr
                     </p>
                     <div className="flex items-center gap-1 justify-end mt-1">
-                      {job.underpaid ? (
-                        <TrendingDown size={13} className="text-red-400" />
-                      ) : (
-                        <TrendingUp size={13} className="text-green-400" />
-                      )}
-                      <p className="text-[#52525B] text-xs">
-                        Market: ${job.market_median}/hr
-                      </p>
+                      {job.underpaid
+                        ? <TrendingDown size={13} className="text-red-400" />
+                        : <TrendingUp size={13} className="text-green-400" />
+                      }
+                      <p className="text-[#52525B] text-xs">Market: ${job.market_median}/hr</p>
                     </div>
                     {job.underpaid && (
                       <p className="text-red-400 text-xs mt-0.5">
@@ -179,7 +197,7 @@ export default function JobsPage() {
           </AnimatePresence>
         </div>
 
-        {/* Job Detail Modal */}
+        {/* ── Job Detail Modal ── */}
         <AnimatePresence>
           {selectedJob && (
             <motion.div
@@ -193,17 +211,18 @@ export default function JobsPage() {
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 40 }}
+                transition={{ ease: [0.22, 1, 0.36, 1] }}
                 onClick={e => e.stopPropagation()}
-                className="bg-[#111118] border border-[#1E1E2E] rounded-2xl p-8 w-full max-w-lg"
+                className="bg-[#111118] border border-[#1E1E2E] rounded-2xl p-8 w-full max-w-lg shadow-2xl"
               >
                 <div className="flex items-start justify-between mb-6">
                   <div>
                     <h2 className="font-display text-2xl font-bold mb-1">{selectedJob.job_title}</h2>
-                    <p className="text-orange-500 font-medium">{selectedJob.company}</p>
+                    <p className="text-[#F97316] font-medium">{selectedJob.company}</p>
                   </div>
                   <button
                     onClick={() => setSelectedJob(null)}
-                    className="text-[#52525B] hover:text-white transition-colors text-xl leading-none"
+                    className="text-[#52525B] hover:text-white transition-colors text-xl leading-none ml-4"
                   >
                     ✕
                   </button>
@@ -211,7 +230,7 @@ export default function JobsPage() {
 
                 {/* Pay comparison */}
                 <div className="bg-[#0A0A0F] rounded-xl p-5 mb-6">
-                  <p className="text-[#52525B] text-xs uppercase tracking-widest mb-3">Pay Analysis</p>
+                  <p className="text-[#52525B] text-xs uppercase tracking-widest mb-4">Pay Analysis</p>
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-[#A1A1AA] text-sm">Posted wage</span>
                     <span className={`font-display text-xl font-bold ${selectedJob.underpaid ? 'text-red-400' : 'text-green-400'}`}>
@@ -228,8 +247,9 @@ export default function JobsPage() {
                     <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 flex items-start gap-2">
                       <AlertTriangle size={14} className="text-red-400 mt-0.5 flex-shrink-0" />
                       <p className="text-red-400 text-sm">
-                        This job pays <strong>${selectedJob.market_median - selectedJob.posted_wage}/hr less</strong> than
-                        fair market rate for a {mockWorker.certification} {mockWorker.trade} in {mockWorker.location}.
+                        This job pays{' '}
+                        <strong>${selectedJob.market_median - selectedJob.posted_wage}/hr less</strong>{' '}
+                        than fair market rate for a {mockWorker.certification} {mockWorker.trade} in {mockWorker.location}.
                         Consider negotiating or looking elsewhere.
                       </p>
                     </div>
@@ -250,7 +270,7 @@ export default function JobsPage() {
                   >
                     Back to jobs
                   </button>
-                  <button className="flex-1 bg-orange-500 hover:bg-orange-400 text-white font-medium py-3 rounded-xl text-sm transition-all">
+                  <button className="flex-1 bg-[#F97316] hover:bg-orange-400 text-white font-medium py-3 rounded-xl text-sm transition-all">
                     Apply now
                   </button>
                 </div>

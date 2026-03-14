@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Download, ArrowLeft, MapPin, Mail, Phone } from 'lucide-react'
@@ -37,7 +37,6 @@ export default function ResumePage() {
       const contentWidth = pageWidth - margin * 2
       let y = 20
 
-      // Header
       pdf.setFont('helvetica', 'bold')
       pdf.setFontSize(22)
       pdf.setTextColor(17, 17, 17)
@@ -60,13 +59,11 @@ export default function ResumePage() {
       )
       y += 4
 
-      // Divider
       pdf.setDrawColor(249, 115, 22)
       pdf.setLineWidth(0.8)
       pdf.line(margin, y, pageWidth - margin, y)
       y += 8
 
-      // Summary
       pdf.setFont('helvetica', 'bold')
       pdf.setFontSize(10)
       pdf.setTextColor(100, 100, 100)
@@ -80,7 +77,6 @@ export default function ResumePage() {
       pdf.text(summaryLines, margin, y)
       y += summaryLines.length * 5 + 6
 
-      // Experience
       pdf.setFont('helvetica', 'bold')
       pdf.setFontSize(10)
       pdf.setTextColor(100, 100, 100)
@@ -92,19 +88,16 @@ export default function ResumePage() {
         pdf.setFontSize(11)
         pdf.setTextColor(17, 17, 17)
         pdf.text(exp.title, margin, y)
-
         pdf.setFont('helvetica', 'normal')
         pdf.setFontSize(9)
         pdf.setTextColor(120, 120, 120)
         pdf.text(exp.duration, pageWidth - margin, y, { align: 'right' })
         y += 5
-
         pdf.setFont('helvetica', 'bold')
         pdf.setFontSize(10)
         pdf.setTextColor(249, 115, 22)
         pdf.text(exp.company, margin, y)
         y += 5
-
         exp.bullets.forEach(bullet => {
           pdf.setFont('helvetica', 'normal')
           pdf.setFontSize(10)
@@ -116,13 +109,11 @@ export default function ResumePage() {
         y += 4
       })
 
-      // Certifications
       pdf.setFont('helvetica', 'bold')
       pdf.setFontSize(10)
       pdf.setTextColor(100, 100, 100)
       pdf.text('CERTIFICATIONS', margin, y)
       y += 5
-
       pdf.setFont('helvetica', 'normal')
       pdf.setFontSize(10)
       pdf.setTextColor(60, 60, 60)
@@ -132,13 +123,11 @@ export default function ResumePage() {
       })
       y += 4
 
-      // Skills
       pdf.setFont('helvetica', 'bold')
       pdf.setFontSize(10)
       pdf.setTextColor(100, 100, 100)
       pdf.text('SKILLS', margin, y)
       y += 5
-
       pdf.setFont('helvetica', 'normal')
       pdf.setFontSize(10)
       pdf.setTextColor(60, 60, 60)
@@ -147,7 +136,6 @@ export default function ResumePage() {
       pdf.text(skillLines, margin, y)
       y += skillLines.length * 5 + 8
 
-      // Footer
       pdf.setFont('helvetica', 'italic')
       pdf.setFontSize(8)
       pdf.setTextColor(180, 180, 180)
@@ -167,7 +155,7 @@ export default function ResumePage() {
       {/* Nav */}
       <nav className="flex items-center justify-between px-8 py-6 border-b border-[#1E1E2E]">
         <span className="font-display text-xl font-bold">
-          Wise<span className="text-orange-500">Hire</span>
+          Wise<span className="text-[#F97316]">Hire</span>
         </span>
         <div className="flex items-center gap-4">
           <button
@@ -180,7 +168,7 @@ export default function ResumePage() {
           <button
             onClick={handleDownload}
             disabled={downloading}
-            className="flex items-center gap-2 bg-orange-500 hover:bg-orange-400 disabled:opacity-60 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+            className="flex items-center gap-2 bg-[#F97316] hover:bg-orange-400 disabled:opacity-60 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
           >
             {downloading ? (
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -197,8 +185,8 @@ export default function ResumePage() {
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="bg-white text-gray-900 rounded-2xl p-10 shadow-2xl"
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          className="bg-white text-gray-900 rounded-2xl p-10 shadow-[0_0_80px_rgba(249,115,22,0.08)]"
         >
           {/* Header */}
           <div className="border-b-2 border-orange-500 pb-6 mb-6">
@@ -230,12 +218,12 @@ export default function ResumePage() {
                       <h3 className="font-bold text-gray-900">{exp.title}</h3>
                       <p className="text-orange-500 text-sm font-medium">{exp.company}</p>
                     </div>
-                    <span className="text-gray-400 text-sm">{exp.duration}</span>
+                    <span className="text-gray-400 text-sm flex-shrink-0 ml-4">{exp.duration}</span>
                   </div>
                   <ul className="mt-2 space-y-1">
                     {exp.bullets.map((bullet, j) => (
                       <li key={j} className="text-gray-600 text-sm flex items-start gap-2">
-                        <span className="text-orange-500 mt-1">•</span>
+                        <span className="text-orange-500 mt-1 flex-shrink-0">•</span>
                         {bullet}
                       </li>
                     ))}
