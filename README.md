@@ -1,4 +1,4 @@
-# TradePass Backend
+# WiseHire Backend
 
 AI-powered career assistant and RAG chatbot for skilled trades workers.
 
