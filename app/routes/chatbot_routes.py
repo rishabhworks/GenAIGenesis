@@ -59,8 +59,19 @@ async def ask_chatbot(request: ChatMessage, db: Session = Depends(get_db)):
     Returns: AI-generated answer from knowledge base
     """
     try:
-        # Generate answer using RAG
-        answer = rag_service.generate_answer_from_context(request.message)
+        # Detect if user is asking about jobs
+        job_keywords = ["job", "match", "employment", "hire", "position", "opportunity", "posting", "work", "salary", "rate", "companies"]
+        is_job_query = any(keyword in request.message.lower() for keyword in job_keywords)
+        
+        if is_job_query:
+            # Search both worker profiles and job postings
+            answer = rag_service.find_jobs_for_worker(
+                worker_query=request.worker_id,  # Find the worker
+                job_query=request.message  # Search for matching jobs
+            )
+        else:
+            # General Q&A using worker profiles namespace
+            answer = rag_service.generate_answer_from_context(request.message)
         
         logger.info(f"Chatbot query from worker {request.worker_id}: {request.message}")
         
