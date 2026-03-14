@@ -46,8 +46,10 @@ class MoorchehRAGService:
                 self.client.create_namespace("worker-profiles", type="text")
                 logger.info("Created worker-profiles namespace")
             except Exception as ns_error:
-                # Namespace may already exist, ignore error
-                logger.debug(f"Namespace check: {ns_error}")
+                if "already exists" in str(ns_error).lower() or "409" in str(ns_error):
+                    logger.debug("worker-profiles namespace already exists")
+                else:
+                    logger.debug(f"Namespace check: {ns_error}")
             
             # Format worker data as text for semantic search
             profile_text = f"""
@@ -183,6 +185,90 @@ Provide a helpful and concise answer."""
         except Exception as e:
             logger.error(f"Failed to generate answer: {e}")
             return f"Error generating answer: {str(e)}"
+    
+    def find_jobs_for_worker(self, worker_query: str, job_query: str = None) -> str:
+        """
+        Find matching jobs for a worker by searching both namespaces
+        
+        Args:
+            worker_query: Query to find the worker profile
+            job_query: Query to find matching jobs (if None, uses worker_query)
+        
+        Returns:
+            AI-generated answer with job matches
+        """
+        if not self.client:
+            logger.warning("Moorcheh client not available")
+            return "RAG service not available"
+        
+        try:
+            import google.generativeai as genai
+            
+            # Use same query for jobs if not specified
+            if job_query is None:
+                job_query = worker_query
+            
+            # Search for worker profile
+            worker_results = self.client.search(
+                namespaces=["worker-profiles"],
+                query=worker_query,
+                top_k=3
+            )
+            
+            # Search for matching jobs
+            job_results = self.client.search(
+                namespaces=["job-postings"],
+                query=job_query,
+                top_k=5
+            )
+            
+            # Extract worker context
+            worker_context = ""
+            for match in worker_results.get("results", []):
+                worker_context += f"Worker Profile:\n{match.get('text', '')}\n\n"
+            
+            # Extract job context
+            job_context = ""
+            for match in job_results.get("results", []):
+                job_context += f"Job Opportunity:\n{match.get('text', '')}\n\n"
+            
+            if not worker_context:
+                return "Worker profile not found in knowledge base."
+            
+            if not job_context:
+                return "No matching jobs found in knowledge base. Please try different search terms."
+            
+            # Use Gemini to match worker to jobs
+            from app.config import settings
+            genai.configure(api_key=settings.GEMINI_API_KEY)
+            model = genai.GenerativeModel("gemini-2.5-flash")
+            
+            prompt = f"""You are a job matching expert. Based on the worker profile and available jobs, 
+identify the best job matches and explain why they're suitable.
+
+WORKER PROFILE:
+{worker_context}
+
+AVAILABLE JOBS:
+{job_context}
+
+Please:
+1. Identify which jobs best match the worker's skills and experience
+2. Explain the match score (0-100%)
+3. Highlight why each job is a good fit
+4. Mention any certification gaps
+5. Provide salary/rate information if relevant
+
+Format your response as a clear, easy-to-read recommendation."""
+            
+            response = model.generate_content(prompt)
+            
+            logger.info(f"Generated job matches for query: {worker_query}")
+            return response.text
+            
+        except Exception as e:
+            logger.error(f"Failed to find jobs for worker: {e}")
+            return f"Error finding jobs: {str(e)}"
 
 
 class MoorchehRecommendationService:
@@ -225,8 +311,10 @@ class MoorchehRecommendationService:
                 self.client.create_namespace("job-postings", type="text")
                 logger.info("Created job-postings namespace")
             except Exception as ns_error:
-                # Namespace may already exist, ignore error
-                logger.debug(f"Namespace check: {ns_error}")
+                if "already exists" in str(ns_error).lower() or "409" in str(ns_error):
+                    logger.debug("job-postings namespace already exists")
+                else:
+                    logger.debug(f"Namespace check: {ns_error}")
             
             job_text = f"""
 Job Title: {job_data.get('title', 'N/A')}
@@ -237,8 +325,8 @@ Required Certifications: {', '.join(job_data.get('required_certifications', []))
 Location: {job_data.get('location', 'N/A')}
 Hourly Rate: ${job_data.get('hourly_rate', 0)}
 Job Type: {job_data.get('job_type', 'N/A')}
-Company: {job_data.get('company_name', 'N/A')}
-Pay Status: {job_data.get('pay_fairness_status', 'N/A')}
+Company: {job_data.get('company') or job_data.get('company_name', 'N/A')}
+Specialties: {', '.join(job_data.get('specialties', []))}
 """
             
             documents = [
