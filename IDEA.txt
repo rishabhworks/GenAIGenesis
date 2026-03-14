@@ -1,0 +1,89 @@
+TradePass – AI Career Agent for Skilled Trades Workers
+
+Project Idea
+
+TradePass is a voice-first AI career assistant designed for skilled
+trades workers who may not have resumes, LinkedIn profiles, or strong
+digital literacy. The platform allows workers to describe their
+experience using voice and automatically generates a structured
+professional profile. Using this profile, the system finds job
+opportunities, detects underpaid positions, and explains complex
+contracts in simple language.
+
+This solution addresses a major labor gap: Canada faces a large shortage
+of skilled trades workers, yet many qualified workers struggle to access
+opportunities due to digital barriers. TradePass bridges this gap by
+providing an accessible, AI-powered job assistant that works entirely
+through voice and simple interactions.
+
+------------------------------------------------------------------------
+
+Core Features
+
+1.  Voice-Based Worker Profile Creation Workers speak about their
+    experience. AI converts the speech into a structured professional
+    profile including trade, experience, certifications, specialties,
+    and location.
+
+2.  Intelligent Job Matching The system finds nearby job opportunities
+    that match the worker’s skills and experience.
+
+3.  Pay Fairness Detection The system analyzes job pay rates against
+    regional market wage data and alerts workers if a job is
+    significantly underpaying.
+
+4.  Plain Language Contract Explanation Workers can upload or paste job
+    contract clauses, and the AI explains them in simple language so
+    workers understand their rights.
+
+------------------------------------------------------------------------
+
+System Workflow Architecture
+
+Step 1: Voice Input The worker records a short voice description of
+their work experience.
+
+Step 2: Speech-to-Text Processing The audio is converted into text using
+an AI speech recognition service.
+
+Step 3: AI Skill Extraction An AI model analyzes the transcript and
+extracts structured information such as: - Trade - Years of experience -
+Certifications - Specialties - Location
+
+Step 4: Worker Profile Creation The extracted data is saved as a digital
+worker profile in the database.
+
+Step 5: Job Data Collection The system gathers job postings from online
+job boards and contractor listings.
+
+Step 6: Job Matching Engine The AI compares job requirements with the
+worker profile and generates a list of relevant job matches.
+
+Step 7: Pay Fairness Analysis The system compares job wages with
+regional trade wage data. If a job pays significantly below the market
+rate, the system flags it and alerts the worker.
+
+Step 8: Contract Explanation Workers can submit job contract text. The
+AI translates the legal language into simple, understandable
+explanations.
+
+------------------------------------------------------------------------
+
+Simplified Architecture Flow
+
+Worker Voice Input | v Speech-to-Text Conversion | v AI Profile
+Extraction | v Worker Profile Database | +——————–+ | | v v Job Matching
+Engine Contract Explainer | v Pay Fairness Detector | v Results Returned
+to User
+
+------------------------------------------------------------------------
+
+Impact
+
+TradePass improves access to employment opportunities for skilled trades
+workers by: - Removing the need for resumes - Providing wage
+transparency - Helping workers understand employment contracts -
+Connecting qualified workers with relevant jobs
+
+The platform improves productivity in the labor market while also
+delivering social impact by empowering underserved workers.
