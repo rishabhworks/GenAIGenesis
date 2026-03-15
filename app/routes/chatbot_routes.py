@@ -1,10 +1,11 @@
 import logging
-from fastapi import APIRouter, HTTPException, Depends
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+from typing import List
 
-from app.database import get_db
 from app.services.moorcheh_service import MoorchehRAGService, MoorchehRecommendationService
+from app.services.pay_fairness_service import PayFairnessService
+from app.services.contract_explainer_service import ContractExplainerService
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/chatbot", tags=["chatbot"])
@@ -12,6 +13,7 @@ router = APIRouter(prefix="/api/v1/chatbot", tags=["chatbot"])
 # Initialize services
 rag_service = MoorchehRAGService()
 recommendation_service = MoorchehRecommendationService()
+contract_explainer = ContractExplainerService()
 
 
 class ChatMessage(BaseModel):
@@ -49,7 +51,7 @@ class JobRecommendation(BaseModel):
 
 
 @router.post("/ask", response_model=ChatResponse)
-async def ask_chatbot(request: ChatMessage, db: Session = Depends(get_db)):
+async def ask_chatbot(request: ChatMessage):
     """
     Ask the AI chatbot questions about your profile, jobs, or recommendations
     
@@ -93,8 +95,7 @@ async def get_job_recommendations(
     trade: str,
     experience_years: int = 0,
     location: str = "",
-    num_recommendations: int = 5,
-    db: Session = Depends(get_db)
+    num_recommendations: int = 5
 ):
     """
     Get personalized job recommendations for a worker
@@ -148,7 +149,7 @@ async def get_job_recommendations(
 
 
 @router.post("/search-workers")
-async def search_workers(query: str, top_k: int = 5, db: Session = Depends(get_db)):
+async def search_workers(query: str, top_k: int = 5):
     """
     Search for workers in the knowledge base
     
@@ -170,4 +171,115 @@ async def search_workers(query: str, top_k: int = 5, db: Session = Depends(get_d
         
     except Exception as e:
         logger.error(f"Worker search error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ── Pay Check ──────────────────────────────────────────────────
+
+class PayCheckRequest(BaseModel):
+    trade: str
+    hourly_rate: float
+    location: str = "Canada"
+
+
+class PayCheckResponse(BaseModel):
+    trade: str
+    your_rate: float
+    market_rate: float
+    difference_percentage: float
+    status: str
+    alert: bool
+    recommendation: str
+
+
+@router.post("/check-pay", response_model=PayCheckResponse)
+async def check_pay(request: PayCheckRequest):
+    """
+    Compare a worker's pay against market rates.
+
+    - **trade**: Trade type (e.g., "Electrician")
+    - **hourly_rate**: Worker's current/expected hourly rate
+    - **location**: Location (defaults to "Canada")
+    """
+    try:
+        market_rate = PayFairnessService.get_market_rate(request.trade, request.location)
+        difference = request.hourly_rate - market_rate
+        difference_pct = (difference / market_rate) * 100 if market_rate > 0 else 0
+
+        threshold = 20  # percent
+
+        if difference_pct < -threshold:
+            status = "underpaid"
+            alert = True
+            recommendation = (
+                f"Your rate is {abs(difference_pct):.1f}% below market. "
+                f"Consider negotiating for at least ${market_rate:.2f}/hr."
+            )
+        elif difference_pct < 0:
+            status = "slightly_below"
+            alert = False
+            recommendation = (
+                f"Your rate is {abs(difference_pct):.1f}% below market average. "
+                f"Acceptable if benefits are strong."
+            )
+        elif difference_pct <= 10:
+            status = "fair"
+            alert = False
+            recommendation = "Your pay is at a fair market rate."
+        else:
+            status = "competitive"
+            alert = False
+            recommendation = f"Great! You earn {difference_pct:.1f}% above market."
+
+        return PayCheckResponse(
+            trade=request.trade,
+            your_rate=request.hourly_rate,
+            market_rate=market_rate,
+            difference_percentage=round(difference_pct, 1),
+            status=status,
+            alert=alert,
+            recommendation=recommendation,
+        )
+    except Exception as e:
+        logger.error(f"Pay check error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ── Contract Explainer ─────────────────────────────────────────
+
+class ContractRequest(BaseModel):
+    contract_text: str
+    language: str = "simple"
+
+
+class ContractResponse(BaseModel):
+    original_text: str
+    simplified_explanation: str
+    key_points: List[str]
+    potential_risks: List[str]
+    recommendations: List[str]
+
+
+@router.post("/explain-contract", response_model=ContractResponse)
+async def explain_contract(request: ContractRequest):
+    """
+    Explain a contract clause in simple language.
+
+    - **contract_text**: The contract text to explain
+    - **language**: Language level (simple / intermediate / detailed)
+    """
+    try:
+        result = contract_explainer.explain_contract(
+            contract_text=request.contract_text,
+            language_level=request.language,
+        )
+        return ContractResponse(
+            original_text=result.original_text,
+            simplified_explanation=result.simplified_explanation,
+            key_points=result.key_points,
+            potential_risks=result.potential_risks,
+            recommendations=result.recommendations,
+        )
+    except Exception as e:
+        logger.error(f"Contract explain error: {e}")
         raise HTTPException(status_code=500, detail=str(e))

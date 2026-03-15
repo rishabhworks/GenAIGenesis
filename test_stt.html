@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>TradePass – ElevenLabs STT Live Test</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea, #764ba2); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .card { background: #fff; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,.25); padding: 48px 40px; max-width: 560px; width: 92%; text-align: center; }
+    h1 { font-size: 1.7em; margin-bottom: 6px; color: #1f2937; }
+    p.sub { color: #6b7280; margin-bottom: 28px; font-size: .95em; }
+    .mic-btn { width: 110px; height: 110px; border-radius: 50%; border: none; font-size: 2.8em; cursor: pointer; transition: .25s; margin: 20px 0 12px; outline: none; }
+    .mic-btn.idle { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
+    .mic-btn.recording { background: #dc2626; color: #fff; animation: pulse 1s infinite; }
+    .mic-btn.sending { background: #f59e0b; color: #fff; cursor: wait; }
+    .mic-btn:disabled { opacity: .45; cursor: not-allowed; }
+    @keyframes pulse { 0%,100%{ box-shadow: 0 0 0 0 rgba(220,38,38,.5); } 50%{ box-shadow: 0 0 0 20px rgba(220,38,38,0); } }
+    .timer { font-size: 1.4em; font-weight: 700; color: #dc2626; min-height: 32px; margin-bottom: 4px; }
+    .status { font-size: .95em; color: #6b7280; margin: 8px 0 16px; min-height: 22px; }
+    .result-box { background: #f0fdf4; border: 2px solid #86efac; border-radius: 12px; padding: 24px; margin-top: 20px; text-align: left; }
+    .result-box.error-box { background: #fef2f2; border-color: #fca5a5; }
+    .result-box h3 { color: #166534; margin-bottom: 10px; font-size: 1em; }
+    .result-box.error-box h3 { color: #991b1b; }
+    .result-box .text { color: #111827; font-size: 1.15em; line-height: 1.6; word-break: break-word; }
+    .result-box .meta { color: #6b7280; font-size: .8em; margin-top: 10px; }
+    .history { margin-top: 28px; text-align: left; }
+    .history h3 { color: #374151; margin-bottom: 10px; font-size: .95em; }
+    .history-item { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; font-size: .9em; color: #374151; }
+    .history-item .ts { color: #9ca3af; font-size: .75em; }
+    .clear-btn { background: none; border: 1px solid #d1d5db; color: #6b7280; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: .8em; float: right; }
+    .clear-btn:hover { background: #f3f4f6; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🎙️ ElevenLabs STT – Live Test</h1>
+    <p class="sub">Press the mic, speak, press again to stop &amp; transcribe</p>
+
+    <div class="timer" id="timer"></div>
+    <button class="mic-btn idle" id="micBtn">🎤</button>
+    <div class="status" id="status">Ready – click the microphone to begin</div>
+
+    <div id="resultBox" class="hidden"></div>
+
+    <div class="history hidden" id="historySection">
+      <h3>📜 History <button class="clear-btn" id="clearBtn">Clear</button></h3>
+      <div id="historyList"></div>
+    </div>
+  </div>
+
+  <script>
+    const BACKEND = '/api/v1/workers/speech-to-text';
+
+    const btn      = document.getElementById('micBtn');
+    const statusEl = document.getElementById('status');
+    const timerEl  = document.getElementById('timer');
+    const resultEl = document.getElementById('resultBox');
+    const histSec  = document.getElementById('historySection');
+    const histList = document.getElementById('historyList');
+    const clearBtn = document.getElementById('clearBtn');
+
+    let mediaRecorder = null;
+    let chunks = [];
+    let recording = false;
+    let timerInterval = null;
+    let startTime = 0;
+
+    btn.addEventListener('click', toggleRecording);
+    clearBtn.addEventListener('click', () => { histList.innerHTML = ''; histSec.classList.add('hidden'); });
+
+    function fmtTime(ms) {
+      const s = Math.floor(ms / 1000);
+      const m = Math.floor(s / 60);
+      return String(m).padStart(2,'0') + ':' + String(s % 60).padStart(2,'0');
+    }
+
+    async function toggleRecording() {
+      if (!recording) {
+        /* ── START ── */
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          // Pick a supported mime type
+          const mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus'
+                     : MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm'
+                     : '';
+          mediaRecorder = mime
+            ? new MediaRecorder(stream, { mimeType: mime })
+            : new MediaRecorder(stream);
+          chunks = [];
+          mediaRecorder.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+          mediaRecorder.start(250);          // collect in 250ms chunks for smoother stop
+          recording = true;
+          startTime = Date.now();
+          timerInterval = setInterval(() => { timerEl.textContent = fmtTime(Date.now() - startTime); }, 200);
+          btn.className = 'mic-btn recording';
+          btn.textContent = '⏹️';
+          statusEl.textContent = '🔴 Recording… speak now, click to stop';
+          resultEl.className = 'hidden';
+        } catch (err) {
+          showResult(true, 'Microphone access denied', err.message);
+        }
+      } else {
+        /* ── STOP & SEND ── */
+        recording = false;
+        clearInterval(timerInterval);
+        btn.className = 'mic-btn sending';
+        btn.textContent = '⏳';
+        btn.disabled = true;
+        statusEl.textContent = '⏳ Sending audio to ElevenLabs…';
+
+        mediaRecorder.onstop = async () => {
+          mediaRecorder.stream.getTracks().forEach(t => t.stop());
+          const ext  = mediaRecorder.mimeType.includes('webm') ? 'webm' : 'ogg';
+          const blob = new Blob(chunks, { type: mediaRecorder.mimeType });
+          const formData = new FormData();
+          formData.append('file', blob, 'recording.' + ext);
+
+          try {
+            const t0  = Date.now();
+            const res = await fetch(BACKEND, { method: 'POST', body: formData });
+            const ms  = Date.now() - t0;
+            if (!res.ok) {
+              const body = await res.json().catch(() => ({}));
+              throw new Error(body.detail || `HTTP ${res.status} ${res.statusText}`);
+            }
+            const data = await res.json();
+            const text = data.text || '(no speech detected)';
+            showResult(false, 'Transcription', text, `API responded in ${ms}ms · audio ${(blob.size/1024).toFixed(1)} KB`);
+            addHistory(text);
+            statusEl.textContent = '✅ Done! Click mic to record again';
+          } catch (err) {
+            showResult(true, 'Transcription failed', err.message);
+            statusEl.textContent = '❌ Failed – click mic to retry';
+          }
+          btn.disabled = false;
+          btn.className = 'mic-btn idle';
+          btn.textContent = '🎤';
+          timerEl.textContent = '';
+        };
+        mediaRecorder.stop();
+      }
+    }
+
+    function showResult(isError, title, text, meta) {
+      resultEl.className = isError ? 'result-box error-box' : 'result-box';
+      resultEl.innerHTML =
+        '<h3>' + (isError ? '❌ ' : '📝 ') + title + '</h3>' +
+        '<div class="text">' + escapeHtml(text) + '</div>' +
+        (meta ? '<div class="meta">' + escapeHtml(meta) + '</div>' : '');
+    }
+
+    function addHistory(text) {
+      histSec.classList.remove('hidden');
+      const div = document.createElement('div');
+      div.className = 'history-item';
+      div.innerHTML = escapeHtml(text) + ' <span class="ts">' + new Date().toLocaleTimeString() + '</span>';
+      histList.prepend(div);
+    }
+
+    function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+  </script>
+</body>
+</html>

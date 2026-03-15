@@ -22,6 +22,9 @@ class Settings:
     MOORCHEH_API_KEY = os.getenv("MOORCHEH_API_KEY", "")
     MOORCHEH_BASE_URL = os.getenv("MOORCHEH_BASE_URL", "https://api.moorcheh.ai/v1")
     
+    # ElevenLabs API (for Speech-to-Text)
+    ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "")
+
     # Job Board APIs (for data collection)
     LINKEDIN_API_KEY = os.getenv("LINKEDIN_API_KEY", "")
     INDEED_API_KEY = os.getenv("INDEED_API_KEY", "")

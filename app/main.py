@@ -1,10 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 import logging
+from pathlib import Path
 
 from app.config import settings
-from app.database import init_db
-from app.routes import voice_router, job_router, pay_router, contract_router, chatbot_router
+from app.routes import voice_router, contract_router, chatbot_router, onboarding_router
 
 # Configure logging
 logging.basicConfig(
@@ -29,23 +30,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize database
-@app.on_event("startup")
-async def startup_event():
-    """Initialize database on startup"""
-    try:
-        init_db()
-        logger.info("Database initialized successfully")
-    except Exception as e:
-        logger.error(f"Database initialization failed: {e}")
-        raise
-
 # Include routes
 app.include_router(voice_router)
-app.include_router(job_router)
-app.include_router(pay_router)
 app.include_router(contract_router)
 app.include_router(chatbot_router)
+app.include_router(onboarding_router)
 
 # Health check endpoint
 @app.get("/api/v1/health")
@@ -68,11 +57,12 @@ async def root():
         "docs": "/docs",
         "redoc": "/redoc",
         "endpoints": {
-            "voice_profile": "/api/v1/workers/voice-profile",
-            "manual_profile": "/api/v1/workers/manual-profile",
-            "match_jobs": "/api/v1/jobs/match-jobs",
-            "pay_check": "/api/v1/pay/check",
-            "explain_contract": "/api/v1/contracts/explain"
+            "speech_to_text": "/api/v1/workers/speech-to-text",
+            "chatbot": "/api/v1/chatbot/ask",
+            "recommendations": "/api/v1/chatbot/recommendations/{worker_id}",
+            "pay_check": "/api/v1/chatbot/check-pay",
+            "explain_contract": "/api/v1/chatbot/explain-contract",
+            "onboarding": "/api/v1/onboarding/register"
         }
     }
 
@@ -84,3 +74,8 @@ if __name__ == "__main__":
         port=8000,
         reload=settings.DEBUG
     )
+
+# Serve the STT test page at /test-stt
+@app.get("/test-stt")
+async def stt_test_page():
+    return FileResponse(Path(__file__).resolve().parent.parent / "test_stt.html", media_type="text/html")

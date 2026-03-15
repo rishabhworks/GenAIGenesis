@@ -90,6 +90,62 @@ Expected Hourly Rate: ${worker_data.get('hourly_rate_expectation', 0)}
             logger.error(f"Failed to upload worker profile: {e}")
             return False
     
+    def find_profile_by_email(self, email: str) -> Optional[Dict]:
+        """Search Moorcheh for an existing worker profile by email."""
+        if not self.client:
+            return None
+        try:
+            results = self.client.search(
+                namespaces=["worker-profiles"],
+                query=f"Email: {email}",
+                top_k=3
+            )
+            for match in results.get("results", []):
+                text = match.get("text", "")
+                # Confirm the email actually appears in the result text
+                if email.lower() in text.lower():
+                    # Parse profile fields from the stored text
+                    profile = {}
+                    for line in text.strip().splitlines():
+                        line = line.strip()
+                        if not line or ":" not in line:
+                            continue
+                        key, _, val = line.partition(":")
+                        val = val.strip()
+                        key = key.strip()
+                        field_map = {
+                            "Worker ID": "worker_id",
+                            "Name": "name",
+                            "Email": "email",
+                            "Phone": "phone",
+                            "Trade": "trade",
+                            "Location": "location",
+                            "Availability": "availability",
+                        }
+                        if key in field_map:
+                            profile[field_map[key]] = val
+                        elif key == "Experience":
+                            try:
+                                profile["experience_years"] = int(val.split()[0])
+                            except (ValueError, IndexError):
+                                profile["experience_years"] = 0
+                        elif key == "Certifications":
+                            profile["certifications"] = [c.strip() for c in val.split(",") if c.strip()]
+                        elif key == "Specialized Skills":
+                            profile["specialties"] = [s.strip() for s in val.split(",") if s.strip()]
+                        elif key == "Expected Hourly Rate":
+                            try:
+                                profile["hourly_rate_expectation"] = float(val.replace("$", ""))
+                            except ValueError:
+                                profile["hourly_rate_expectation"] = 0
+                    if profile.get("email"):
+                        profile.setdefault("skill_summary", "")
+                        return profile
+            return None
+        except Exception as e:
+            logger.error(f"Email lookup failed: {e}")
+            return None
+    
     def query_worker_knowledge_base(self, query: str, top_k: int = 5) -> List[Dict]:
         """
         Search worker knowledge base using semantic search

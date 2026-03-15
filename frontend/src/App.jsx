@@ -1,24 +1,40 @@
 import React, { useState } from 'react';
+import Onboarding from './components/Onboarding';
+import Resume from './components/Resume';
 import ChatBot from './components/ChatBot';
 import Recommendations from './components/Recommendations';
-import WorkerSearch from './components/WorkerSearch';
+import PayCheck from './components/PayCheck';
+import ContractExplainer from './components/ContractExplainer';
 import './App.css';
 
 function App() {
-  const [activeTab, setActiveTab] = useState('chat');
-  const [workerId, setWorkerId] = useState('worker-001');
-  const [showWorkerModal, setShowWorkerModal] = useState(false);
-  const [tempWorkerId, setTempWorkerId] = useState(workerId);
+  const [workerId, setWorkerId] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [activeTab, setActiveTab] = useState('resume');
 
-  const handleChangeWorker = () => {
-    setWorkerId(tempWorkerId);
-    setShowWorkerModal(false);
+  const handleOnboardingComplete = (data) => {
+    setWorkerId(data.worker_id);
+    setProfile(data.profile);
+    setActiveTab('resume');
   };
 
-  const presetWorkers = [
-    { id: 'worker-001', name: 'Carlos Rodriguez - Electrician' },
-    { id: 'worker-002', name: 'Maria Chen - Plumber' },
-    { id: 'worker-003', name: 'David Thompson - HVAC' },
+  const handleLogout = () => {
+    setWorkerId(null);
+    setProfile(null);
+    setActiveTab('resume');
+  };
+
+  // Show onboarding if no profile yet
+  if (!workerId || !profile) {
+    return <Onboarding onComplete={handleOnboardingComplete} />;
+  }
+
+  const TABS = [
+    { key: 'resume', label: '📄 Resume' },
+    { key: 'chat', label: '💬 Job Matching' },
+    { key: 'recommendations', label: '🎯 Recommendations' },
+    { key: 'paycheck', label: '💰 Pay Check' },
+    { key: 'contracts', label: '📋 Contracts' },
   ];
 
   return (
@@ -27,89 +43,37 @@ function App() {
         <div className="header-content">
           <div className="logo-section">
             <h1>⚡ TradePass</h1>
-            <p>AI-Powered Job Matching for Skilled Trades</p>
+            <p>AI-Powered Career Agent for Skilled Trades</p>
           </div>
-          <button
-            className="worker-selector"
-            onClick={() => setShowWorkerModal(true)}
-          >
-            👤 {workerId}
-          </button>
+          <div className="user-info">
+            <span className="user-name">👤 {profile.name}</span>
+            <button className="logout-btn" onClick={handleLogout}>Logout</button>
+          </div>
         </div>
       </header>
 
-      {showWorkerModal && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <div className="modal-header">
-              <h2>Select Worker Profile</h2>
-            </div>
-            <div className="modal-body">
-              <div className="preset-workers">
-                {presetWorkers.map((worker) => (
-                  <button
-                    key={worker.id}
-                    className={`worker-option ${workerId === worker.id ? 'active' : ''}`}
-                    onClick={() => {
-                      setTempWorkerId(worker.id);
-                    }}
-                  >
-                    {worker.name}
-                  </button>
-                ))}
-              </div>
-              <div className="custom-worker">
-                <label htmlFor="custom-id">Or enter custom Worker ID:</label>
-                <input
-                  id="custom-id"
-                  type="text"
-                  value={tempWorkerId}
-                  onChange={(e) => setTempWorkerId(e.target.value)}
-                  placeholder="e.g., worker-004"
-                />
-              </div>
-            </div>
-            <div className="modal-actions">
-              <button className="btn-cancel" onClick={() => setShowWorkerModal(false)}>
-                Cancel
-              </button>
-              <button className="btn-confirm" onClick={handleChangeWorker}>
-                Confirm
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       <nav className="app-nav">
-        <button
-          className={`nav-item ${activeTab === 'chat' ? 'active' : ''}`}
-          onClick={() => setActiveTab('chat')}
-        >
-          💬 Chat
-        </button>
-        <button
-          className={`nav-item ${activeTab === 'recommendations' ? 'active' : ''}`}
-          onClick={() => setActiveTab('recommendations')}
-        >
-          🎯 Recommendations
-        </button>
-        <button
-          className={`nav-item ${activeTab === 'search' ? 'active' : ''}`}
-          onClick={() => setActiveTab('search')}
-        >
-          🔍 Search Workers
-        </button>
+        {TABS.map((tab) => (
+          <button
+            key={tab.key}
+            className={`nav-item ${activeTab === tab.key ? 'active' : ''}`}
+            onClick={() => setActiveTab(tab.key)}
+          >
+            {tab.label}
+          </button>
+        ))}
       </nav>
 
       <main className="app-content">
+        {activeTab === 'resume' && <Resume profile={profile} workerId={workerId} />}
         {activeTab === 'chat' && <ChatBot workerId={workerId} />}
         {activeTab === 'recommendations' && <Recommendations workerId={workerId} />}
-        {activeTab === 'search' && <WorkerSearch />}
+        {activeTab === 'paycheck' && <PayCheck />}
+        {activeTab === 'contracts' && <ContractExplainer />}
       </main>
 
       <footer className="app-footer">
-        <p>&copy; 2026 TradePass - Job Matching Platform. All rights reserved.</p>
+        <p>&copy; 2026 TradePass - AI Career Agent. All rights reserved.</p>
       </footer>
     </div>
   );

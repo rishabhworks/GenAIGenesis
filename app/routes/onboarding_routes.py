@@ -31,15 +31,28 @@ class OnboardingResponse(BaseModel):
     worker_id: str
     profile: dict
     uploaded_to_knowledge_base: bool
+    existing_user: bool = False
 
 
 @router.post("/register", response_model=OnboardingResponse)
 async def register_worker(profile: OnboardingProfile):
     """
     Register a new worker from the onboarding flow.
-    Stores profile in Moorcheh knowledge base for AI matching.
+    If email already exists in knowledge base, return the existing profile.
     """
     try:
+        # Check if email already exists
+        existing = rag_service.find_profile_by_email(profile.email)
+        if existing:
+            worker_id = existing.pop("worker_id", f"worker-{profile.email}")
+            logger.info(f"Existing profile found for {profile.email} as {worker_id}")
+            return OnboardingResponse(
+                worker_id=worker_id,
+                profile=existing,
+                uploaded_to_knowledge_base=True,
+                existing_user=True,
+            )
+
         # Generate a unique worker ID
         worker_id = f"worker-{uuid.uuid4().hex[:8]}"
 
