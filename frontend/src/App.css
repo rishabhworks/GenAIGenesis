@@ -706,3 +706,84 @@ select:focus {
   flex-direction: column;
   gap: 2px;
 }
+
+/* ——— EDIT PROFILE MODAL ——— */
+.edit-modal {
+  max-width: 600px !important;
+}
+
+.edit-modal-body {
+  max-height: 60vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.edit-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.edit-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.edit-form-group--full {
+  grid-column: 1 / -1;
+}
+
+.edit-form-group label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-weight: 600;
+}
+
+.edit-form-group input {
+  padding: 10px 14px;
+  background: var(--surface-2, #111820);
+  border: 1px solid var(--border, #1A2535);
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text-1, #E8EDF2);
+  transition: all 0.2s ease;
+}
+
+.edit-form-group input::placeholder {
+  color: var(--text-muted, #3A4F65);
+}
+
+.edit-form-group input:focus {
+  outline: none;
+  border-color: var(--teal-mid, #1A7A8A);
+  box-shadow: 0 0 0 3px rgba(26,122,138,0.15);
+}
+
+.edit-modal-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.btn-signout {
+  padding: 11px 16px;
+  background: transparent;
+  border: 1px solid rgba(220,38,38,0.3);
+  border-radius: 10px;
+  color: #FCA5A5;
+  font-size: 0.875rem;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-right: auto;
+}
+
+.btn-signout:hover {
+  background: rgba(220,38,38,0.08);
+  border-color: rgba(220,38,38,0.5);
+}
