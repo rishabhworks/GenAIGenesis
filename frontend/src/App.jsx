@@ -7,18 +7,22 @@ import ContractExplainer from './components/ContractExplainer';
 import Resume from './components/Resume';
 import Onboarding from './components/Onboarding';
 import AppEffects from './components/AppEffects';
-import logo from './assets/logo.png';
 import './App.css';
 
 function App() {
   const [activeTab, setActiveTab] = useState('chat');
-  const [workerId, setWorkerId] = useState('worker-001');
+  const [workerId, setWorkerId] = useState(
+    localStorage.getItem('wiseworks_worker_id') || 'worker-001'
+  );
   const [showWorkerModal, setShowWorkerModal] = useState(false);
   const [tempWorkerId, setTempWorkerId] = useState(workerId);
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(
+    !localStorage.getItem('wiseworks_worker_id')
+  );
 
   const handleChangeWorker = () => {
     setWorkerId(tempWorkerId);
+    localStorage.setItem('wiseworks_worker_id', tempWorkerId);
     setShowWorkerModal(false);
   };
 
@@ -29,19 +33,31 @@ function App() {
   ];
 
   if (showOnboarding) {
-    return <Onboarding onComplete={() => setShowOnboarding(false)} />;
+    return (
+      <Onboarding onComplete={(worker) => {
+        if (worker?.id) {
+          setWorkerId(worker.id);
+          localStorage.setItem('wiseworks_worker_id', worker.id);
+        }
+        setShowOnboarding(false);
+      }} />
+    );
   }
 
   return (
     <div className="app">
       <AppEffects />
+
       <header className="app-header">
         <div className="header-content">
           <div className="logo-section">
             <div className="logo-lockup">
-              <img src={logo} alt="WiseWorks" className="logo-img" />
+              <img src="/src/assets/logo.png" alt="WiseWorks" className="logo-img" />
               <div className="logo-text">
-                <h1><span className="logo-wise">WISE</span><span className="logo-works">WORKS</span></h1>
+                <h1>
+                  <span className="logo-wise">WISE</span>
+                  <span className="logo-works">WORKS</span>
+                </h1>
                 <p>AI-Powered Job Matching for Skilled Trades</p>
               </div>
             </div>

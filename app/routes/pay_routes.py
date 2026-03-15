@@ -1,4 +1,6 @@
 import logging
+from app.schemas.job_schema import PayFairnessRequest, PayFairnessResponse, DirectPayCheckRequest, DirectPayCheckResponse
+from app.services.moorcheh_service import MoorchehRAGService
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 
@@ -74,4 +76,38 @@ async def get_market_rate(
         
     except Exception as e:
         logger.error(f"Get market rate failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/direct-check", response_model=DirectPayCheckResponse)
+async def direct_pay_check(request: DirectPayCheckRequest):
+    """
+    Check pay fairness directly using trade, hourly rate and location.
+    Uses Moorcheh AI + wage data namespace — no job_id required.
+    """
+    try:
+        rag_service = MoorchehRAGService()
+        result = rag_service.analyze_pay_fairness(
+            trade=request.trade,
+            hourly_rate=request.hourly_rate,
+            location=request.location
+        )
+
+        if result.get('status') == 'error':
+            raise HTTPException(status_code=500, detail=result.get('recommendation', 'Analysis failed'))
+
+        return DirectPayCheckResponse(
+            trade=request.trade,
+            hourly_rate=request.hourly_rate,
+            market_rate=result.get('market_rate', 0),
+            difference_percentage=result.get('difference_percentage', 0),
+            status=result.get('status', 'unknown'),
+            alert=result.get('alert', False),
+            recommendation=result.get('recommendation', ''),
+            location=request.location
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Direct pay check failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))

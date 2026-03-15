@@ -7,7 +7,6 @@ logger = logging.getLogger(__name__)
 
 
 def _get_moorcheh_client():
-    """Create and return a MoorchehClient instance"""
     from moorcheh_sdk import MoorchehClient
     return MoorchehClient(
         api_key=settings.MOORCHEH_API_KEY,
@@ -16,7 +15,6 @@ def _get_moorcheh_client():
 
 
 def _ensure_namespace(client, namespace_name: str) -> None:
-    """Create namespace if it doesn't exist"""
     try:
         from moorcheh_sdk import ConflictError
     except ImportError:
@@ -33,12 +31,7 @@ def _ensure_namespace(client, namespace_name: str) -> None:
             logger.warning(f"Namespace creation issue: {e}")
 
 
-# ===========================================================================
-# Worker Profile Service (Moorcheh namespace: worker-profiles)
-# ===========================================================================
-
 class MoorchehRAGService:
-    """Core Moorcheh service for worker profiles, job matching, and chatbot Q&A"""
 
     def __init__(self):
         try:
@@ -48,14 +41,11 @@ class MoorchehRAGService:
             logger.error(f"Failed to initialize MoorchehRAGService: {e}")
             self.client = None
 
-    # ---- Worker Profiles ----
-
     def upload_user_profile_to_knowledge_base(self, worker_id: str, worker_data: Dict) -> bool:
         if not self.client:
             return False
         try:
             _ensure_namespace(self.client, "worker-profiles")
-
             profile_text = f"""Worker ID: {worker_id}
 Name: {worker_data.get('name', 'N/A')}
 Email: {worker_data.get('email', 'N/A')}
@@ -98,8 +88,6 @@ Expected Hourly Rate: ${worker_data.get('hourly_rate_expectation', 0)}"""
             logger.error(f"Failed to query worker knowledge base: {e}")
             return []
 
-    # ---- Chatbot Q&A (RAG over worker-profiles) ----
-
     def generate_answer_from_context(self, query: str, namespace: str = "worker-profiles") -> str:
         if not self.client:
             return "RAG service not available"
@@ -109,14 +97,12 @@ Expected Hourly Rate: ${worker_data.get('hourly_rate_expectation', 0)}"""
                 query=query,
                 top_k=5,
                 temperature=0.7,
-                header_prompt="You are TradePass, an AI career assistant for skilled trades workers. Answer questions helpfully based on worker profiles and job data."
+                header_prompt="You are WiseWorks, an AI career assistant for skilled trades workers in Canada. Answer questions helpfully based on worker profiles and job data."
             )
             return response.get("answer", "No answer generated.")
         except Exception as e:
             logger.error(f"Failed to generate answer: {e}")
             return f"Error generating answer: {str(e)}"
-
-    # ---- Feature 1: Intelligent Job Matching (Moorcheh semantic search + AI) ----
 
     def find_jobs_for_worker(self, worker_query: str, job_query: str = None) -> str:
         if not self.client:
@@ -125,45 +111,40 @@ Expected Hourly Rate: ${worker_data.get('hourly_rate_expectation', 0)}"""
             if job_query is None:
                 job_query = worker_query
 
-            worker_results = self.client.similarity_search.query(
-                namespaces=["worker-profiles"], query=worker_query, top_k=3
-            )
+            # Only search job-postings namespace
+            # worker_query is the actual profile text passed directly — no namespace query
             job_results = self.client.similarity_search.query(
                 namespaces=["job-postings"], query=job_query, top_k=5
             )
 
-            worker_context = "\n".join(
-                f"Worker Profile:\n{m.get('text', '')}" for m in worker_results.get("results", [])
-            )
             job_context = "\n".join(
-                f"Job Opportunity:\n{m.get('text', '')}" for m in job_results.get("results", [])
+                f"Job Opportunity:\n{m.get('text', '')}"
+                for m in job_results.get("results", [])
             )
 
-            if not worker_context:
-                return "Worker profile not found in knowledge base."
             if not job_context:
-                return "No matching jobs found. Try different search terms."
+                return "No matching jobs found in our database. Try different search terms."
 
-            combined_query = f"""You are a job matching expert for TradePass. Based on the worker profile and available jobs,
-identify the best job matches and explain why they're suitable.
+            combined_query = f"""You are a job matching expert for WiseWorks. Match ONLY THIS SPECIFIC WORKER to available jobs.
 
-WORKER PROFILE:
-{worker_context}
+THIS WORKER'S PROFILE (match ONLY this person):
+{worker_query}
 
 AVAILABLE JOBS:
 {job_context}
 
-Please:
-1. Rank jobs by match quality (best first)
-2. Give each a match score (0-100%)
-3. Explain why each job fits
-4. Note any certification gaps
-5. Include pay rate info
+Instructions:
+1. Only analyze THIS worker — do not mention or compare other workers
+2. Rank jobs by match quality for THIS worker (best first)
+3. Give each job a match score (0-100%)
+4. Explain specifically why each job fits THIS worker's trade, experience, and location
+5. Note any certification gaps THIS worker has
+6. Include pay rate comparison vs THIS worker's expected rate
 
-Format as a clear, easy-to-read recommendation list."""
+Format as a clear, personalized recommendation list for this worker only."""
 
             response = self.client.answer.generate(
-                namespace="",  # Direct AI Mode
+                namespace="",
                 query=combined_query,
                 temperature=0.5
             )
@@ -172,14 +153,10 @@ Format as a clear, easy-to-read recommendation list."""
             logger.error(f"Failed to find jobs for worker: {e}")
             return f"Error finding jobs: {str(e)}"
 
-    # ---- Feature 2: Pay Fairness Detection (Moorcheh AI) ----
-
     def analyze_pay_fairness(self, trade: str, hourly_rate: float, location: str = "Canada") -> Dict:
-        """Use Moorcheh to analyze whether a job's pay is fair vs market data"""
         if not self.client:
             return {"status": "error", "alert": False, "recommendation": "Service unavailable"}
         try:
-            # First search wage-data namespace for relevant market data
             wage_results = self.client.similarity_search.query(
                 namespaces=["wage-data"],
                 query=f"{trade} wages in {location}",
@@ -213,15 +190,13 @@ Return your analysis as JSON with these exact fields:
 Return ONLY the JSON object, no other text."""
 
             response = self.client.answer.generate(
-                namespace="",  # Direct AI Mode - context in query
+                namespace="",
                 query=query,
                 temperature=0.2
             )
 
             answer_text = response.get("answer", "{}")
-            # Parse JSON from response
             try:
-                # Strip markdown code fences if present
                 clean = answer_text.strip()
                 if clean.startswith("```"):
                     clean = clean.split("\n", 1)[1] if "\n" in clean else clean[3:]
@@ -246,10 +221,7 @@ Return ONLY the JSON object, no other text."""
             logger.error(f"Pay fairness analysis failed: {e}")
             return {"status": "error", "alert": False, "recommendation": str(e)}
 
-    # ---- Feature 3: Contract Explanation (Moorcheh Direct AI) ----
-
     def explain_contract(self, contract_text: str, language_level: str = "simple") -> Dict:
-        """Use Moorcheh AI to explain employment contracts in plain language"""
         if not self.client:
             return {"simplified_explanation": "Service unavailable", "key_points": [], "potential_risks": [], "recommendations": []}
         try:
@@ -277,7 +249,7 @@ Analyze this contract and return your response as JSON with these exact fields:
 Return ONLY the JSON object, no other text."""
 
             response = self.client.answer.generate(
-                namespace="",  # Direct AI Mode
+                namespace="",
                 query=query,
                 temperature=0.3,
                 header_prompt="You are a legal expert specialized in employment law for skilled trades in Canada. Always protect workers' interests."
@@ -301,10 +273,7 @@ Return ONLY the JSON object, no other text."""
             logger.error(f"Contract explanation failed: {e}")
             return {"simplified_explanation": str(e), "key_points": [], "potential_risks": [], "recommendations": []}
 
-    # ---- Feature 4: Voice Profile Extraction (Moorcheh Direct AI) ----
-
     def extract_profile_from_transcript(self, transcript: str) -> Dict:
-        """Use Moorcheh AI to extract structured worker profile from voice transcript"""
         if not self.client:
             return None
         try:
@@ -328,7 +297,7 @@ Return a JSON object with these exact fields:
 Return ONLY the JSON object."""
 
             response = self.client.answer.generate(
-                namespace="",  # Direct AI Mode
+                namespace="",
                 query=query,
                 temperature=0.2,
                 header_prompt="You are a profile extraction specialist. Extract accurate structured data from worker descriptions."
@@ -348,12 +317,7 @@ Return ONLY the JSON object."""
             return None
 
 
-# ===========================================================================
-# Job Recommendations Service (Moorcheh namespace: job-postings)
-# ===========================================================================
-
 class MoorchehRecommendationService:
-    """Service for job recommendations using Moorcheh semantic search"""
 
     def __init__(self):
         try:
@@ -368,7 +332,6 @@ class MoorchehRecommendationService:
             return False
         try:
             _ensure_namespace(self.client, "job-postings")
-
             job_text = f"""Job Title: {job_data.get('title', 'N/A')}
 Trade Required: {job_data.get('trade', 'N/A')}
 Description: {job_data.get('description', 'N/A')}
@@ -413,12 +376,7 @@ Specialties: {', '.join(job_data.get('specialties', []))}"""
             return []
 
 
-# ===========================================================================
-# Wage Data Service (Moorcheh namespace: wage-data)
-# ===========================================================================
-
 class MoorchehWageDataService:
-    """Service for managing Canadian trade wage data in Moorcheh"""
 
     def __init__(self):
         try:

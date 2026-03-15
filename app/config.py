@@ -18,6 +18,9 @@ class Settings:
     GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
     GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-1.5-pro")  # or gemini-1.5-flash for faster, cheaper responses
     
+    # ElevenLabs (for Speech-to-Text, primary)
+    ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "")
+    
     # Moorcheh API (for RAG chatbot and recommendations)
     MOORCHEH_API_KEY = os.getenv("MOORCHEH_API_KEY", "")
     MOORCHEH_BASE_URL = os.getenv("MOORCHEH_BASE_URL", "https://api.moorcheh.ai/v1")

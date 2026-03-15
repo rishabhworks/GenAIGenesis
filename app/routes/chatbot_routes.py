@@ -5,24 +5,22 @@ from pydantic import BaseModel
 from typing import Optional
 
 from app.database import get_db
+from app.models.worker import Worker
 from app.services.moorcheh_service import MoorchehRAGService, MoorchehRecommendationService
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1/chatbot", tags=["chatbot"])
 
-# Initialize services
 rag_service = MoorchehRAGService()
 recommendation_service = MoorchehRecommendationService()
 
 
 class ChatMessage(BaseModel):
-    """Chat message request"""
     worker_id: str
     message: str
 
 
 class ChatResponse(BaseModel):
-    """Chat response"""
     worker_id: str
     user_message: str
     bot_response: str
@@ -30,20 +28,17 @@ class ChatResponse(BaseModel):
 
 
 class PayCheckRequest(BaseModel):
-    """Pay fairness check via chatbot"""
     trade: str
     hourly_rate: float
     location: str = "Canada"
 
 
 class ContractRequest(BaseModel):
-    """Contract explanation request via chatbot"""
     contract_text: str
     language: str = "simple"
 
 
 class RecommendationRequest(BaseModel):
-    """Job recommendation request"""
     worker_id: str
     trade: str
     experience_years: int
@@ -53,7 +48,6 @@ class RecommendationRequest(BaseModel):
 
 
 class JobRecommendation(BaseModel):
-    """Job recommendation response"""
     job_id: str
     relevance_score: float
     title: str
@@ -62,32 +56,39 @@ class JobRecommendation(BaseModel):
     hourly_rate: float
 
 
+def get_worker_profile_text(worker_id: str, db: Session) -> str:
+    """Helper to get worker profile text from DB"""
+    worker = db.query(Worker).filter(Worker.id == worker_id).first()
+    if worker:
+        return f"""Worker ID: {worker.id}
+Trade: {worker.trade}
+Experience: {worker.experience_years} years
+Certifications: {worker.certifications or 'None'}
+Specialties: {worker.specialties or 'None'}
+Location: {worker.location}
+Availability: {worker.availability}
+Expected Rate: ${worker.hourly_rate_expectation or 0}/hr"""
+    return None
+
+
 @router.post("/ask", response_model=ChatResponse)
 async def ask_chatbot(request: ChatMessage, db: Session = Depends(get_db)):
     """
-    Smart chatbot that auto-detects intent and routes to the right Moorcheh feature:
-    - Job matching queries -> Moorcheh semantic search + AI job matching
-    - Pay fairness queries -> Moorcheh AI pay analysis
-    - Contract queries -> Moorcheh AI contract explanation
-    - General queries -> Moorcheh RAG over worker-profiles
+    Smart chatbot that auto-detects intent and routes to the right Moorcheh feature.
     """
     try:
         message_lower = request.message.lower()
 
-        # Detect pay fairness queries
         pay_keywords = ["underpaid", "pay fair", "wage", "salary fair", "market rate", "am i being paid", "is this pay", "pay check", "underpaying"]
         is_pay_query = any(kw in message_lower for kw in pay_keywords)
 
-        # Detect contract queries
         contract_keywords = ["contract", "clause", "agreement", "terms", "legal", "employment agreement", "non-compete", "termination clause"]
         is_contract_query = any(kw in message_lower for kw in contract_keywords)
 
-        # Detect job queries
-        job_keywords = ["job", "match", "employment", "hire", "position", "opportunity", "posting", "work for me", "companies", "find me"]
+        job_keywords = ["job", "match", "employment", "hire", "position", "opportunity", "posting", "work for me", "companies", "find me", "skills"]
         is_job_query = any(kw in message_lower for kw in job_keywords)
 
         if is_contract_query and len(request.message) > 100:
-            # Long message with contract keywords => contract explanation
             result = rag_service.explain_contract(request.message, "simple")
             answer = f"**Contract Explanation:**\n\n{result.get('simplified_explanation', '')}"
             if result.get('key_points'):
@@ -99,20 +100,23 @@ async def ask_chatbot(request: ChatMessage, db: Session = Depends(get_db)):
             source = "moorcheh-contract-ai"
 
         elif is_pay_query:
-            # Pay fairness query - use Moorcheh AI analysis
-            answer = rag_service.generate_answer_from_context(request.message, namespace="wage-data")
+            answer = rag_service.generate_answer_from_context(
+                request.message, namespace="wage-data"
+            )
             source = "moorcheh-pay-fairness"
 
         elif is_job_query:
-            # Job matching - search both namespaces
+            worker_profile_text = get_worker_profile_text(request.worker_id, db)
+            if not worker_profile_text:
+                worker_profile_text = request.worker_id
+
             answer = rag_service.find_jobs_for_worker(
-                worker_query=request.worker_id,
+                worker_query=worker_profile_text,
                 job_query=request.message
             )
             source = "moorcheh-job-matching"
 
         else:
-            # General Q&A using worker profiles
             answer = rag_service.generate_answer_from_context(request.message)
             source = "moorcheh-rag"
 
@@ -130,9 +134,7 @@ async def ask_chatbot(request: ChatMessage, db: Session = Depends(get_db)):
 
 @router.post("/check-pay")
 async def check_pay_fairness_chat(request: PayCheckRequest):
-    """
-    Check pay fairness using Moorcheh AI + wage-data namespace
-    """
+    """Check pay fairness using Moorcheh AI + wage-data namespace"""
     try:
         result = rag_service.analyze_pay_fairness(
             trade=request.trade,
@@ -147,9 +149,7 @@ async def check_pay_fairness_chat(request: PayCheckRequest):
 
 @router.post("/explain-contract")
 async def explain_contract_chat(request: ContractRequest):
-    """
-    Explain employment contract using Moorcheh AI (Direct AI Mode)
-    """
+    """Explain employment contract using Moorcheh AI"""
     try:
         result = rag_service.explain_contract(
             contract_text=request.contract_text,
@@ -172,12 +172,17 @@ async def get_job_recommendations(
 ):
     """Get job recommendations using Moorcheh semantic search"""
     try:
-        worker_profile = f"I am a {trade} with {experience_years} years of experience located in {location}."
+        worker_profile_text = get_worker_profile_text(worker_id, db)
+        if not worker_profile_text:
+            worker_profile_text = f"I am a {trade} with {experience_years} years of experience located in {location}."
+
         recommendations = recommendation_service.get_job_recommendations(
-            worker_profile, num_recommendations
+            worker_profile_text, num_recommendations
         )
+
         if not recommendations:
             return []
+
         result = []
         for rec in recommendations:
             metadata = rec.get("metadata", {})
@@ -192,6 +197,7 @@ async def get_job_recommendations(
                 )
             )
         return result
+
     except Exception as e:
         logger.error(f"Recommendation error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
