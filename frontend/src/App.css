@@ -28,6 +28,7 @@
 
 html {
   scroll-behavior: smooth;
+  font-size: 125%;
 }
 
 body {
@@ -194,7 +195,7 @@ body {
   border: none;
   border-bottom: 2px solid transparent;
   cursor: pointer;
-  font-size: 0.82rem;
+  font-size: 1rem;
   font-weight: 600;
   font-family: 'DM Sans', sans-serif;
   color: #3A4F65;
