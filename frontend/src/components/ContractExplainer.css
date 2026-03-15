@@ -1,0 +1,35 @@
+.contract-container { max-width: 800px; margin: 0 auto; }
+.contract-header { text-align: center; margin-bottom: 2rem; }
+.contract-header h2 { font-size: 1.8rem; margin-bottom: .3rem; }
+.contract-header p { color: #666; }
+
+.contract-form { background: #fff; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); margin-bottom: 1rem; }
+.contract-form .form-group { margin-bottom: 1rem; }
+.contract-form label { display: block; font-weight: 600; margin-bottom: .5rem; color: #333; }
+.contract-form textarea { width: 100%; padding: .75rem; border: 2px solid #e0e0e0; border-radius: 8px; font-family: inherit; font-size: .95rem; resize: vertical; box-sizing: border-box; }
+.contract-form textarea:focus { border-color: #4a90d9; outline: none; }
+.contract-form select { width: 100%; padding: .6rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: .95rem; }
+
+.explain-btn { width: 100%; padding: .8rem; font-size: 1.05rem; font-weight: 600; background: #4a90d9; color: #fff; border: none; border-radius: 8px; cursor: pointer; }
+.explain-btn:hover:not(:disabled) { background: #357abd; }
+.explain-btn:disabled { opacity: .6; cursor: not-allowed; }
+
+.sample-contracts { margin-bottom: 1.5rem; }
+.samples-label { font-size: .85rem; color: #888; margin-bottom: .5rem; }
+.sample-buttons { display: flex; gap: .5rem; flex-wrap: wrap; }
+.sample-btn { padding: .4rem .8rem; font-size: .85rem; background: #f0f4f8; border: 1px solid #d0d8e0; border-radius: 20px; cursor: pointer; }
+.sample-btn:hover { background: #e0e8f0; border-color: #4a90d9; }
+
+.contract-error { background: #fff3f3; border: 1px solid #ffcdd2; color: #c62828; padding: .75rem 1rem; border-radius: 8px; margin-bottom: 1rem; }
+
+.result-card { background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); overflow: hidden; }
+.result-section { padding: 1.25rem 1.5rem; border-bottom: 1px solid #f0f0f0; }
+.result-section:last-child { border-bottom: none; }
+.result-section h3 { font-size: 1.05rem; margin: 0 0 .75rem; color: #333; }
+.result-section p { line-height: 1.7; color: #444; margin: 0; }
+.result-section ul { list-style: none; padding: 0; margin: 0; }
+.result-section li { padding: .4rem 0 .4rem 1.5rem; position: relative; line-height: 1.5; color: #444; }
+.result-section li::before { content: '✓'; position: absolute; left: 0; color: #4caf50; font-weight: bold; }
+.result-section.risks { background: #fff8e1; }
+.result-section.risks li::before { content: '⚠'; color: #f57c00; }
+.result-section.recommendations { background: #e8f5e9; }
