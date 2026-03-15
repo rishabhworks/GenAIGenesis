@@ -1,24 +1,42 @@
 import React, { useState } from 'react';
 import ChatBot from './components/ChatBot';
 import Recommendations from './components/Recommendations';
-import WorkerSearch from './components/WorkerSearch';
 import PayCheck from './components/PayCheck';
 import ContractExplainer from './components/ContractExplainer';
-import Resume from './components/Resume';
+import Dashboard from './components/Dashboard';
 import Onboarding from './components/Onboarding';
+import Landing from './components/Landing';
 import AppEffects from './components/AppEffects';
 import './App.css';
 
 function App() {
-  const [activeTab, setActiveTab] = useState('chat');
+  const [screen, setScreen] = useState(
+    localStorage.getItem('wiseworks_worker_id') ? 'app' : 'landing'
+  );
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [workerId, setWorkerId] = useState(
-    localStorage.getItem('wiseworks_worker_id') || 'worker-001'
+    localStorage.getItem('wiseworks_worker_id') || ''
   );
   const [showWorkerModal, setShowWorkerModal] = useState(false);
   const [tempWorkerId, setTempWorkerId] = useState(workerId);
-  const [showOnboarding, setShowOnboarding] = useState(
-    !localStorage.getItem('wiseworks_worker_id')
-  );
+
+  const handleSignOut = () => {
+    localStorage.removeItem('wiseworks_worker_id');
+    localStorage.removeItem('wiseworks_worker');
+    localStorage.removeItem('wiseworks_worker_name');
+    setWorkerId('');
+    setScreen('landing');
+    setActiveTab('dashboard');
+  };
+
+  const handleOnboardingComplete = (worker) => {
+    if (worker?.id) {
+      setWorkerId(worker.id);
+      localStorage.setItem('wiseworks_worker_id', worker.id);
+    }
+    setScreen('app');
+    setActiveTab('dashboard');
+  };
 
   const handleChangeWorker = () => {
     setWorkerId(tempWorkerId);
@@ -32,18 +50,30 @@ function App() {
     { id: 'worker-003', name: 'David Thompson - HVAC' },
   ];
 
-  if (showOnboarding) {
+  // ——— LANDING ———
+  if (screen === 'landing') {
     return (
-      <Onboarding onComplete={(worker) => {
-        if (worker?.id) {
-          setWorkerId(worker.id);
-          localStorage.setItem('wiseworks_worker_id', worker.id);
-        }
-        setShowOnboarding(false);
-      }} />
+      <Landing
+        onTryNow={() => setScreen('onboarding')}
+        onExistingUser={() => {
+          const id = localStorage.getItem('wiseworks_worker_id');
+          if (id) {
+            setWorkerId(id);
+            setScreen('app');
+          } else {
+            setScreen('onboarding');
+          }
+        }}
+      />
     );
   }
 
+  // ——— ONBOARDING ———
+  if (screen === 'onboarding') {
+    return <Onboarding onComplete={handleOnboardingComplete} />;
+  }
+
+  // ——— MAIN APP ———
   return (
     <div className="app">
       <AppEffects />
@@ -66,7 +96,7 @@ function App() {
             className="worker-selector"
             onClick={() => setShowWorkerModal(true)}
           >
-            👤 {workerId}
+            👤 {localStorage.getItem('wiseworks_worker_name') || workerId?.slice(0, 12) || 'worker'}
           </button>
         </div>
       </header>
@@ -114,6 +144,12 @@ function App() {
 
       <nav className="app-nav">
         <button
+          className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}
+          onClick={() => setActiveTab('dashboard')}
+        >
+          🏠 Dashboard
+        </button>
+        <button
           className={`nav-item ${activeTab === 'chat' ? 'active' : ''}`}
           onClick={() => setActiveTab('chat')}
         >
@@ -124,12 +160,6 @@ function App() {
           onClick={() => setActiveTab('recommendations')}
         >
           🎯 Recommendations
-        </button>
-        <button
-          className={`nav-item ${activeTab === 'search' ? 'active' : ''}`}
-          onClick={() => setActiveTab('search')}
-        >
-          🔍 Search Workers
         </button>
         <button
           className={`nav-item ${activeTab === 'paycheck' ? 'active' : ''}`}
@@ -143,32 +173,16 @@ function App() {
         >
           📋 Contracts
         </button>
-        <button
-          className={`nav-item ${activeTab === 'resume' ? 'active' : ''}`}
-          onClick={() => setActiveTab('resume')}
-        >
-          📄 Resume
-        </button>
       </nav>
 
       <main className="app-content">
+        {activeTab === 'dashboard' && (
+          <Dashboard workerId={workerId} onSignOut={handleSignOut} />
+        )}
         {activeTab === 'chat' && <ChatBot workerId={workerId} />}
         {activeTab === 'recommendations' && <Recommendations workerId={workerId} />}
-        {activeTab === 'search' && <WorkerSearch />}
         {activeTab === 'paycheck' && <PayCheck />}
         {activeTab === 'contracts' && <ContractExplainer />}
-        {activeTab === 'resume' && <Resume workerId={workerId} profile={{
-          name: 'Carlos Rodriguez',
-          trade: 'Electrician',
-          email: 'carlos@email.com',
-          phone: '(416) 555-1234',
-          location: 'Toronto, Ontario',
-          availability: 'Full-time',
-          experience_years: 8,
-          hourly_rate_expectation: 38,
-          skill_summary: 'Licensed Red Seal electrician with 8 years of residential and commercial experience across the GTA. Specialized in panel upgrades, code compliance, and solar installation.',
-          specialties: ['Red Seal Certification', 'Residential Wiring', 'Panel Upgrades', 'Solar Installation', 'Code Compliance', 'WHMIS 2015'],
-        }} />}
       </main>
 
       <footer className="app-footer">

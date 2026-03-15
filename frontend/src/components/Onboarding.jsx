@@ -2,36 +2,6 @@ import React, { useState, useRef } from 'react';
 import AppEffects from './AppEffects';
 import './Onboarding.css';
 
-const WORD_TO_NUM = {
-  'zero':0,'one':1,'two':2,'three':3,'four':4,'five':5,'six':6,'seven':7,
-  'eight':8,'nine':9,'ten':10,'eleven':11,'twelve':12,'thirteen':13,
-  'fourteen':14,'fifteen':15,'sixteen':16,'seventeen':17,'eighteen':18,
-  'nineteen':19,'twenty':20,'twenty-one':21,'twenty-two':22,'twenty-three':23,
-  'twenty-four':24,'twenty-five':25,'twenty-six':26,'twenty-seven':27,
-  'twenty-eight':28,'twenty-nine':29,'thirty':30,'thirty-five':35,
-  'forty':40,'forty-five':45,'fifty':50,'fifty-five':55,'sixty':60,
-  'sixty-five':65,'seventy':70,'seventy-five':75,'eighty':80,'ninety':90,
-  'ninety-nine':99,'hundred':100,'one hundred':100,
-  // compound numbers like "thirty five" -> 35
-};
-
-const parseNumber = (val) => {
-  if (!val) return 0;
-  const str = val.toString().toLowerCase().trim();
-  // Try direct parse first
-  const direct = parseFloat(str.replace(/[^0-9.]/g, ''));
-  if (!isNaN(direct)) return direct;
-  // Try word lookup
-  if (WORD_TO_NUM[str] !== undefined) return WORD_TO_NUM[str];
-  // Try splitting compound words like "thirty five"
-  const words = str.split(/\s+/);
-  let total = 0;
-  for (const word of words) {
-    if (WORD_TO_NUM[word] !== undefined) total += WORD_TO_NUM[word];
-  }
-  return total || 0;
-};
-
 const QUESTIONS = [
   { key: 'name',                    question: "What's your full name?",                          placeholder: "e.g. Carlos Rodriguez" },
   { key: 'trade',                   question: "What trade do you work in?",                      placeholder: "e.g. Electrician, Plumber, HVAC..." },
@@ -42,6 +12,32 @@ const QUESTIONS = [
   { key: 'availability',            question: "Are you available full-time or part-time?",       placeholder: "Full-time or Part-time" },
   { key: 'hourly_rate_expectation', question: "What's your expected hourly rate?",               placeholder: "e.g. 38" },
 ];
+
+const WORD_TO_NUM = {
+  'zero':0,'one':1,'two':2,'three':3,'four':4,'five':5,'six':6,'seven':7,
+  'eight':8,'nine':9,'ten':10,'eleven':11,'twelve':12,'thirteen':13,
+  'fourteen':14,'fifteen':15,'sixteen':16,'seventeen':17,'eighteen':18,
+  'nineteen':19,'twenty':20,'twenty-one':21,'twenty-two':22,'twenty-three':23,
+  'twenty-four':24,'twenty-five':25,'twenty-six':26,'twenty-seven':27,
+  'twenty-eight':28,'twenty-nine':29,'thirty':30,'thirty-five':35,
+  'forty':40,'forty-five':45,'fifty':50,'fifty-five':55,'sixty':60,
+  'sixty-five':65,'seventy':70,'seventy-five':75,'eighty':80,'ninety':90,
+  'ninety-nine':99,'hundred':100,'one hundred':100,
+};
+
+const parseNumber = (val) => {
+  if (!val) return 0;
+  const str = val.toString().toLowerCase().trim();
+  const direct = parseFloat(str.replace(/[^0-9.]/g, ''));
+  if (!isNaN(direct)) return direct;
+  if (WORD_TO_NUM[str] !== undefined) return WORD_TO_NUM[str];
+  const words = str.split(/\s+/);
+  let total = 0;
+  for (const word of words) {
+    if (WORD_TO_NUM[word] !== undefined) total += WORD_TO_NUM[word];
+  }
+  return total || 0;
+};
 
 export default function Onboarding({ onComplete }) {
   const [step, setStep] = useState(0);
@@ -60,7 +56,6 @@ export default function Onboarding({ onComplete }) {
   const isLast = step === QUESTIONS.length - 1;
   const progress = ((step) / QUESTIONS.length) * 100;
 
-  // ——— RECORDING ———
   const startRecording = async () => {
     try {
       setError(null);
@@ -106,7 +101,6 @@ export default function Onboarding({ onComplete }) {
       );
 
       if (!res.ok) throw new Error('Transcription failed');
-
       const data = await res.json();
       setInputValue(data.transcript || '');
     } catch (err) {
@@ -116,7 +110,6 @@ export default function Onboarding({ onComplete }) {
     }
   };
 
-  // ——— NAVIGATION ———
   const handleNext = async () => {
     if (!inputValue.trim()) return;
 
@@ -140,7 +133,6 @@ export default function Onboarding({ onComplete }) {
     }
   };
 
-  // ——— SUBMIT ———
   const submitProfile = async (data) => {
     setSubmitting(true);
     setError(null);
@@ -180,6 +172,7 @@ export default function Onboarding({ onComplete }) {
       const worker = await res.json();
       localStorage.setItem('wiseworks_worker_id', worker.id);
       localStorage.setItem('wiseworks_worker', JSON.stringify(worker));
+      localStorage.setItem('wiseworks_worker_name', data.name || '');
       onComplete(worker);
 
     } catch (err) {
@@ -194,7 +187,6 @@ export default function Onboarding({ onComplete }) {
       <AppEffects />
       <div className="onboarding-card">
 
-        {/* Header */}
         <div className="onboarding-header">
           <h1>
             <span className="logo-wise">WISE</span>
@@ -203,17 +195,14 @@ export default function Onboarding({ onComplete }) {
           <p>Let's build your profile in under a minute</p>
         </div>
 
-        {/* Progress */}
         <div className="progress-bar">
           <div className="progress-fill" style={{ width: `${progress}%` }} />
         </div>
         <span className="step-counter">Step {step + 1} of {QUESTIONS.length}</span>
 
-        {/* Question */}
         <div className="question-area">
           <label className="question-label">{current.question}</label>
 
-          {/* Input row */}
           <div className="voice-input-row">
             <input
               type="text"
@@ -228,7 +217,6 @@ export default function Onboarding({ onComplete }) {
               autoFocus
             />
 
-            {/* Mic button */}
             <button
               className={`mic-btn ${recording ? 'mic-btn--active' : ''} ${processing ? 'mic-btn--processing' : ''}`}
               onClick={recording ? stopRecording : startRecording}
@@ -252,10 +240,8 @@ export default function Onboarding({ onComplete }) {
           )}
         </div>
 
-        {/* Error */}
         {error && <p className="onboarding-error">⚠ {error}</p>}
 
-        {/* Actions */}
         <div className="onboarding-actions">
           {step > 0 && (
             <button className="btn-back" onClick={handleBack} disabled={submitting}>
