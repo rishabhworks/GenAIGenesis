@@ -90,7 +90,7 @@ export default function Onboarding({ onComplete }) {
     <div className="onboarding-page">
       <div className="onboarding-card">
         <div className="onboarding-header">
-          <h1>⚡ Welcome to TradePass</h1>
+          <h1><span className="logo-wise">WISE</span><span className="logo-works">WORKS</span></h1>
           <p>Let's build your professional profile in under a minute</p>
         </div>
 

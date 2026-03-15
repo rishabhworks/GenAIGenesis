@@ -76,10 +76,14 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(8, 12, 16, 0.92);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border);
+  background: rgba(8, 12, 16, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(26, 122, 138, 0.2);
+  box-shadow:
+    0 1px 0 rgba(26, 122, 138, 0.15),
+    0 4px 32px rgba(0, 0, 0, 0.5),
+    inset 0 -1px 0 rgba(26, 122, 138, 0.08);
 }
 
 .header-content {
@@ -88,20 +92,35 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 32px;
+  padding: 18px 32px;
+  position: relative;
+}
+
+/* subtle teal sweep behind the header */
+.header-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(ellipse at 20% 50%, rgba(26,122,138,0.07), transparent 60%),
+              radial-gradient(ellipse at 80% 50%, rgba(196,146,42,0.04), transparent 60%);
+  pointer-events: none;
 }
 
 .logo-section {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
+  position: relative;
 }
 
 .logo-section h1 {
   font-family: 'Cinzel', serif;
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   font-weight: 700;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
   color: var(--text-1);
   background: none;
   -webkit-text-fill-color: unset;
@@ -109,19 +128,21 @@ body {
   line-height: 1;
 }
 
-.logo-section h1 .logo-wise {
-  color: var(--teal-bright);
+.logo-wise {
+  color: #22A8BE;
+  text-shadow: 0 0 30px rgba(34,168,190,0.6), 0 0 60px rgba(34,168,190,0.2);
 }
 
-.logo-section h1 .logo-works {
-  color: var(--gold-mid);
+.logo-works {
+  color: #E8B84B;
+  text-shadow: 0 0 30px rgba(232,184,75,0.5), 0 0 60px rgba(232,184,75,0.15);
 }
 
 .logo-section p {
   margin: 0;
   color: var(--text-muted);
-  font-size: 0.75rem;
-  letter-spacing: 1px;
+  font-size: 0.7rem;
+  letter-spacing: 2px;
   text-transform: uppercase;
 }
 
@@ -129,10 +150,10 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: var(--surface-2);
+  background: rgba(26, 122, 138, 0.08);
   color: var(--text-2);
-  border: 1px solid var(--border);
-  padding: 9px 16px;
+  border: 1px solid rgba(26, 122, 138, 0.25);
+  padding: 9px 18px;
   border-radius: 10px;
   cursor: pointer;
   font-size: 0.85rem;
@@ -140,60 +161,49 @@ body {
   font-family: 'DM Sans', sans-serif;
   transition: all 0.25s ease;
   position: relative;
-  overflow: hidden;
-}
-
-.worker-selector::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, var(--teal-glow), transparent);
-  opacity: 0;
-  transition: opacity 0.25s ease;
 }
 
 .worker-selector:hover {
-  border-color: var(--teal-mid);
+  border-color: var(--teal-bright);
   color: var(--teal-bright);
-  transform: none;
-  box-shadow: 0 0 16px var(--teal-glow);
-}
-
-.worker-selector:hover::before {
-  opacity: 1;
+  background: rgba(26, 122, 138, 0.14);
+  box-shadow: 0 0 20px rgba(26,122,138,0.2), inset 0 0 12px rgba(26,122,138,0.05);
 }
 
 /* ——— NAV ——— */
 .app-nav {
   display: flex;
-  background: rgba(8, 12, 16, 0.92);
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border);
+  background: rgba(8, 12, 16, 0.7);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(26,122,138,0.12);
   padding: 0 32px;
   overflow-x: auto;
   scrollbar-width: none;
   position: sticky;
   top: 65px;
   z-index: 99;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
 }
 
 .app-nav::-webkit-scrollbar { display: none; }
 
 .nav-item {
-  flex: 0 0 auto;
-  padding: 14px 22px;
+  flex: 1;
+  padding: 16px 20px;
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
   cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 500;
+  font-size: 0.82rem;
+  font-weight: 600;
   font-family: 'DM Sans', sans-serif;
-  color: var(--text-muted);
+  color: #3A4F65;
   transition: all 0.25s ease;
   white-space: nowrap;
   position: relative;
-  letter-spacing: 0.3px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  text-align: center;
 }
 
 .nav-item::after {
@@ -211,16 +221,17 @@ body {
 
 .nav-item:hover {
   color: var(--text-2);
-  background: rgba(26, 122, 138, 0.05);
+  background: rgba(26,122,138,0.05);
 }
 
 .nav-item.active {
   color: var(--teal-bright);
-  border-bottom-color: transparent;
+  text-shadow: 0 0 16px rgba(34,168,190,0.6);
 }
 
 .nav-item.active::after {
   width: 80%;
+  box-shadow: 0 0 8px rgba(26,122,138,0.5);
 }
 
 /* ——— CONTENT ——— */
@@ -432,4 +443,265 @@ body {
 
   .app-content { padding: 0 16px; margin: 20px auto; }
   .app-footer { padding: 16px 20px; }
+}
+
+/* ——— CUSTOM CURSOR ——— */
+*, *::before, *::after { cursor: none !important; }
+
+.cursor-ring {
+  position: fixed;
+  width: 36px;
+  height: 36px;
+  border: 1.5px solid rgba(26, 122, 138, 0.7);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: width 0.2s ease, height 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  backdrop-filter: invert(0.03);
+}
+
+.cursor-ring.cursor--hover {
+  width: 56px;
+  height: 56px;
+  border-color: rgba(232, 184, 75, 0.8);
+  background: rgba(232, 184, 75, 0.06);
+}
+
+.cursor-dot {
+  position: fixed;
+  width: 5px;
+  height: 5px;
+  background: var(--teal-bright);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10000;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 6px var(--teal-bright), 0 0 12px rgba(26,122,138,0.5);
+  transition: background 0.15s ease;
+}
+
+/* ——— CORE DEPTH SYSTEM ——— */
+
+/* Every major card gets ambient glow + depth */
+.chatbot-container,
+.recommendations-container,
+.worker-search-container,
+.paycheck-form,
+.paycheck-result,
+.contract-form,
+.result-card,
+.resume-sheet,
+.onboarding-card {
+  box-shadow:
+    0 0 0 1px rgba(26, 122, 138, 0.12),
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    0 0 80px rgba(26, 122, 138, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition: box-shadow 0.4s ease, transform 0.4s ease;
+}
+
+.chatbot-container:hover,
+.recommendations-container:hover,
+.worker-search-container:hover,
+.paycheck-form:hover,
+.contract-form:hover,
+.resume-sheet:hover,
+.onboarding-card:hover {
+  box-shadow:
+    0 0 0 1px rgba(26, 122, 138, 0.22),
+    0 16px 48px rgba(0, 0, 0, 0.6),
+    0 0 120px rgba(26, 122, 138, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transform: translateY(-2px);
+}
+
+/* ——— AMBIENT BACKGROUND GLOW ——— */
+.app-content {
+  position: relative;
+}
+
+.app-content::before {
+  content: '';
+  position: fixed;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 500px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(26, 122, 138, 0.06) 0%,
+    rgba(196, 146, 42, 0.03) 40%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 0;
+  animation: ambientPulse 6s ease-in-out infinite;
+}
+
+@keyframes ambientPulse {
+  0%, 100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+  50% { opacity: 1; transform: translateX(-50%) scale(1.08); }
+}
+
+/* ——— ACTIVE NAV GLOW ——— */
+.nav-item.active {
+  color: var(--teal-bright);
+  text-shadow: 0 0 20px rgba(26, 122, 138, 0.8);
+}
+
+.nav-item.active::after {
+  box-shadow: 0 0 8px rgba(26, 122, 138, 0.6);
+}
+
+/* ——— INPUT FOCUS GLOW ——— */
+input:focus,
+textarea:focus,
+select:focus {
+  box-shadow:
+    0 0 0 3px rgba(26, 122, 138, 0.15),
+    0 0 20px rgba(26, 122, 138, 0.1) !important;
+}
+
+/* ——— BUTTON GLOW ——— */
+.check-btn,
+.explain-btn,
+.send-button,
+.search-button,
+.apply-button,
+.btn-next,
+.btn-confirm {
+  position: relative;
+}
+
+.check-btn::before,
+.explain-btn::before,
+.search-button::before,
+.apply-button::before,
+.btn-next::before,
+.btn-confirm::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--teal-mid), var(--gold-mid));
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.3s ease;
+  filter: blur(8px);
+}
+
+.check-btn:hover::before,
+.explain-btn:hover::before,
+.search-button:hover::before,
+.apply-button:hover::before,
+.btn-next:hover::before,
+.btn-confirm:hover::before {
+  opacity: 0.6;
+}
+
+/* ——— JOB CARD HOVER LIGHT ——— */
+.job-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.job-card::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle at var(--mx, 50%) var(--my, 50%),
+    rgba(26, 122, 138, 0.06),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.job-card:hover::after {
+  opacity: 1;
+}
+
+/* ——— HEADER DEPTH ——— */
+.app-header {
+  box-shadow:
+    0 1px 0 rgba(26, 122, 138, 0.15),
+    0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* ——— LOGO GLOW ——— */
+.logo-wise {
+  text-shadow: 0 0 20px rgba(34, 168, 190, 0.5);
+}
+
+.logo-works {
+  text-shadow: 0 0 20px rgba(232, 184, 75, 0.4);
+}
+
+/* ——— SECTION HEADINGS GLOW ——— */
+.section-heading,
+.chatbot-header h2,
+.recommendations-header h2,
+.search-header h2,
+.paycheck-header h2,
+.contract-header h2 {
+  text-shadow: 0 0 24px rgba(26, 122, 138, 0.3);
+}
+
+/* ——— RESULT VALUES GLOW ——— */
+.result-value,
+.exp-years,
+.rate-value {
+  text-shadow: 0 0 20px rgba(34, 168, 190, 0.3);
+}
+
+/* ——— MATCH SCORE PULSE ——— */
+.match-score {
+  animation: scorePulse 3s ease-in-out infinite;
+}
+
+@keyframes scorePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(26, 122, 138, 0); }
+  50% { box-shadow: 0 0 12px 2px rgba(26, 122, 138, 0.3); }
+}
+
+/* ——— WORKER SELECTOR GLOW ——— */
+.worker-selector:hover {
+  box-shadow: 0 0 20px rgba(26, 122, 138, 0.2);
+}
+
+/* ——— FOOTER SUBTLE GLOW ——— */
+.app-footer {
+  box-shadow: 0 -1px 0 rgba(26, 122, 138, 0.1);
+}
+
+.logo-lockup {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.logo-img {
+  width: 150px;
+  height: 150px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 12px rgba(26,122,138,0.4)) drop-shadow(0 0 24px rgba(196,146,42,0.2));
+  animation: logoFloat 4s ease-in-out infinite;
+}
+
+@keyframes logoFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); filter: drop-shadow(0 0 12px rgba(26,122,138,0.4)) drop-shadow(0 0 24px rgba(196,146,42,0.2)); }
+  50% { transform: translateY(-3px) rotate(1deg); filter: drop-shadow(0 0 20px rgba(26,122,138,0.6)) drop-shadow(0 0 36px rgba(196,146,42,0.3)); }
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }

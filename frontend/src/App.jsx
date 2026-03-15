@@ -5,6 +5,9 @@ import WorkerSearch from './components/WorkerSearch';
 import PayCheck from './components/PayCheck';
 import ContractExplainer from './components/ContractExplainer';
 import Resume from './components/Resume';
+import Onboarding from './components/Onboarding';
+import AppEffects from './components/AppEffects';
+import logo from './assets/logo.png';
 import './App.css';
 
 function App() {
@@ -12,6 +15,7 @@ function App() {
   const [workerId, setWorkerId] = useState('worker-001');
   const [showWorkerModal, setShowWorkerModal] = useState(false);
   const [tempWorkerId, setTempWorkerId] = useState(workerId);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const handleChangeWorker = () => {
     setWorkerId(tempWorkerId);
@@ -24,13 +28,23 @@ function App() {
     { id: 'worker-003', name: 'David Thompson - HVAC' },
   ];
 
+  if (showOnboarding) {
+    return <Onboarding onComplete={() => setShowOnboarding(false)} />;
+  }
+
   return (
     <div className="app">
+      <AppEffects />
       <header className="app-header">
         <div className="header-content">
           <div className="logo-section">
-            <h1><span className="logo-wise">WISE</span><span className="logo-works">WORKS</span></h1>
-            <p>AI-Powered Job Matching for Skilled Trades</p>
+            <div className="logo-lockup">
+              <img src={logo} alt="WiseWorks" className="logo-img" />
+              <div className="logo-text">
+                <h1><span className="logo-wise">WISE</span><span className="logo-works">WORKS</span></h1>
+                <p>AI-Powered Job Matching for Skilled Trades</p>
+              </div>
+            </div>
           </div>
           <button
             className="worker-selector"
@@ -53,9 +67,7 @@ function App() {
                   <button
                     key={worker.id}
                     className={`worker-option ${workerId === worker.id ? 'active' : ''}`}
-                    onClick={() => {
-                      setTempWorkerId(worker.id);
-                    }}
+                    onClick={() => setTempWorkerId(worker.id)}
                   >
                     {worker.name}
                   </button>
@@ -140,11 +152,11 @@ function App() {
           hourly_rate_expectation: 38,
           skill_summary: 'Licensed Red Seal electrician with 8 years of residential and commercial experience across the GTA. Specialized in panel upgrades, code compliance, and solar installation.',
           specialties: ['Red Seal Certification', 'Residential Wiring', 'Panel Upgrades', 'Solar Installation', 'Code Compliance', 'WHMIS 2015'],
-          }} />}
+        }} />}
       </main>
 
       <footer className="app-footer">
-       <p>&copy; 2026 WiseWorks — AI Career Agent for Skilled Trades. Built at GenAI Genesis 🇨🇦</p>
+        <p>&copy; 2026 WiseWorks — AI Career Agent for Skilled Trades. Built at GenAI Genesis 🇨🇦</p>
       </footer>
     </div>
   );
