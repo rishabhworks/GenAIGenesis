@@ -154,11 +154,8 @@ POST   /api/v1/contracts/explain               →  Contract explanation
 
 ## 🏆 Prize Tracks
 ```
-🎯  Google Best AI for Community Impact
-💰  TD Best AI Hack to Detect Financial Fraud
-☀️  Sun Life Best Healthcare Hack Using Agentic AI
-🔵  IBM Best AI Hack using IBM Technology
-🌟  Top 2 Overall
+🎨   Google: Best AI for Community Impact
+🛠️  Moorcheh AI: Best AI Application that Leverages Efficient Memory 
 ```
 
 
