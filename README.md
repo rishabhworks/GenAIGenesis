@@ -176,6 +176,6 @@ POST   /api/v1/contracts/explain               →  Contract explanation
 
 *Built in 36 hours at GenAI Genesis 2026 🇨🇦*
 
-*For the trades workers who keep Canada running. 🔧⚡🔩*
+*For the trades workers who keep Canada running 🔧⚡🔩*
 
 </div>
