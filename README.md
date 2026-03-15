@@ -154,7 +154,7 @@ POST   /api/v1/contracts/explain               →  Contract explanation
 
 ## 🏆 Prize Tracks
 ```
-🎨   Google: Best AI for Community Impact
+🎨  Google: Best AI for Community Impact
 🛠️  Moorcheh AI: Best AI Application that Leverages Efficient Memory 
 ```
 
