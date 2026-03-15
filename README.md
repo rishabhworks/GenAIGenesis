@@ -18,7 +18,7 @@
 > *The workers exist. The demand exists.*
 > *The infrastructure connecting them is completely broken.*
 
-Every AI hiring tool in existence was built for HR departments — for people with LinkedIn profiles, polished resumes, and keyword-optimized PDFs.
+Every AI hiring tool in existence was built for HR departments, for people with LinkedIn profiles, polished resumes, and keyword-optimized PDFs.
 
 **Nobody built anything for Carlos.**
 
