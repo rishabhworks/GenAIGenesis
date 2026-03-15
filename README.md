@@ -38,10 +38,10 @@ Carlos is a Red Seal electrician with 20 years of experience. He's never written
 │                                                         │
 │                    ▼ 8 seconds later                    │
 │                                                         │
-│   ✅ Profile created                                    |
-│   ✅ 5 matching jobs found                              |
-│   ✅ 2 jobs flagged as underpaying you                  |
-│   ✅ Resume generated & ready to download               |
+│   ✅ Profile created                                     |
+│   ✅ 5 matching jobs found                               |
+│   ✅ 2 jobs flagged as underpaying you                   |
+│   ✅ Resume generated & ready to download                |
 │                                                         |
 └─────────────────────────────────────────────────────────┘
 ```
