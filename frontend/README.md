@@ -1,19 +1,19 @@
-# TradePass Frontend
+# WiseWorks Frontend
 
-Modern React frontend for TradePass - AI-powered job matching platform for skilled trades.
+Modern React frontend for WiseWorks - AI-powered job matching platform for skilled trades.
 
 ## Features
 
 - 💬 **AI Chatbot** - Ask questions about job opportunities, skills, and career advice
 - 🎯 **Job Recommendations** - Get personalized job recommendations based on your profile
 - 🔍 **Worker Search** - Search for workers by skills, trade, and experience
-- 🔄 **Real-time Integration** - Seamlessly integrated with TradePass backend API
+- 🔄 **Real-time Integration** - Seamlessly integrated with WiseWorks backend API
 
 ## Prerequisites
 
 - Node.js 16+ (or compatible)
 - npm or yarn package manager
-- TradePass backend running on `http://localhost:8000`
+- WiseWorks backend running on `http://localhost:8000`
 
 ## Installation
 
@@ -156,4 +156,4 @@ For issues or questions about the frontend, check the backend API documentation 
 
 ## License
 
-Same as TradePass backend project.
+Same as WiseWorks backend project.

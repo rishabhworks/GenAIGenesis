@@ -153,13 +153,13 @@ function App() {
               onClick={() => setActiveTab('dashboard')}
               style={{ cursor: 'pointer' }}
             >
-              <img src="/src/assets/logo.png" alt="WiseWorks" className="logo-img" />
+              <img src="/src/assets/logo2.png" alt="WiseWorks" className="logo-img" />
               <div className="logo-text">
                 <h1>
                   <span className="logo-wise">WISE</span>
                   <span className="logo-works">WORKS</span>
                 </h1>
-                <p>AI-Powered Job Matching for Skilled Trades</p>
+                <p>AI-Powered Job Matching for Elderly Skilled Trades</p>
               </div>
             </div>
           </div>
