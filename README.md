@@ -1,340 +1,182 @@
-# WiseHire Backend
-
-AI-powered career assistant and RAG chatbot for skilled trades workers.
-
-## Features Implemented
-
-✅ **Voice-to-Profile Generation** - Convert voice recordings to worker profiles  
-✅ **Semantic Search** - Find workers matching specific skills using Moorcheh RAG  
-✅ **Job Recommendations** - Personalized job matches based on worker profiles  
-✅ **RAG Chatbot** - Knowledge base-driven Q&A system  
-✅ **Pay Fairness Detection** - Alert when jobs pay below market rate (20% threshold)  
-✅ **Contract Explanation** - Explain legal text in simple language  
-
-## Tech Stack
-
-- **Backend Framework**: FastAPI
-- **AI Models**: Google Gemini 2.5 Flash
-- **Knowledge Base**: Moorcheh AI (semantic search & RAG)
-- **Database**: SQLite (development)
-- **Language**: Python 3.12 (required)
+### 🦉 AI Career Agent for Skilled Trades
+### *Your voice is your resume.*
 
 ---
 
-## Prerequisites
+![Built at GenAI Genesis](https://img.shields.io/badge/Built%20at-GenAI%20Genesis%202026-teal?style=for-the-badge)
+![Python](https://img.shields.io/badge/Python-FastAPI-blue?style=for-the-badge&logo=python)
+![React](https://img.shields.io/badge/Frontend-React%20%2B%20Vite-61DAFB?style=for-the-badge&logo=react)
+![Moorcheh](https://img.shields.io/badge/AI-Moorcheh%20RAG-purple?style=for-the-badge)
+![ElevenLabs](https://img.shields.io/badge/Voice-ElevenLabs%20STT-orange?style=for-the-badge)
 
-### Required Software
-
-- **Python 3.12** (not 3.13 or 3.14 - specific version required)
-  - Download from: https://www.python.org/downloads/release/python-3120/
-  - Verify installation: `python --version` should show Python 3.12.x
-
-### API Keys Required
-
-You'll need to obtain API keys from:
-
-1. **Google Gemini API** → https://ai.google.dev/
-   - Get free tier API key
-   - Used for: speech-to-text, worker profile generation, RAG answer generation
-
-2. **Moorcheh AI** → https://console.moorcheh.ai/
-   - Sign up for account
-   - Get API key from dashboard
-   - Used for: semantic search, knowledge base management, job recommendations
+</div>
 
 ---
 
-## Setup Instructions
+## 🇨🇦 The Problem Nobody's Solving
 
-### 1. Clone Repository
+> *300,000+ skilled trades jobs sit unfilled in Canada.*
+> *The workers exist. The demand exists.*
+> *The infrastructure connecting them is completely broken.*
 
+Every AI hiring tool in existence was built for HR departments — for people with LinkedIn profiles, polished resumes, and keyword-optimized PDFs.
+
+**Nobody built anything for Carlos.**
+
+Carlos is a Red Seal electrician with 20 years of experience. He's never written a resume. He doesn't have LinkedIn. He finds work through word of mouth and job site conversations.
+
+**WiseWorks was built for Carlos.**
+
+---
+
+## 🎙 Just Speak. We Handle The Rest.
+```
+┌─────────────────────────────────────────────────────────┐
+│                                                         │
+│   "I'm an electrician. 8 years. Red Seal certified.     │
+│    Residential work mostly. Based in Mississauga."      │
+│                                                         │
+│                    ▼ 8 seconds later                    │
+│                                                         │
+│   ✅ Profile created                                   │
+│   ✅ 5 matching jobs found                             │
+│   ✅ 2 jobs flagged as underpaying you                 │
+│   ✅ Resume generated & ready to download              │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## ⚡ Features
+```
+🎙  VOICE ONBOARDING      →  Speak your experience. No typing. No forms.
+💰  PAY FAIRNESS CHECK    →  Know if a job is lowballing you. Real market data.
+🎯  AI JOB MATCHING       →  Moorcheh semantic search. Your skills → best jobs.
+📋  CONTRACT EXPLAINER    →  Plain language. No lawyers needed.
+💬  AI CHAT ASSISTANT     →  Ask anything. Get real answers.
+📄  RESUME GENERATOR      →  Professional PDF. Downloaded in one click.
+```
+
+---
+
+## 🛠 Tech Stack
+```
+┌──────────────┬─────────────────────────────────────────┐
+│ Layer        │ Technology                              │
+├──────────────┼─────────────────────────────────────────┤
+│ Frontend     │ React + Vite + Custom CSS               │
+│ Backend      │ FastAPI (Python)                        │
+│ Database     │ SQLite + Moorcheh Vector Namespaces     │
+│ AI / RAG     │ Moorcheh AI                             │
+│ Voice STT    │ ElevenLabs (primary) + Gemini (backup)  │
+│ Wage Data    │ Canadian Labour Market Data 2025-2026   │
+└──────────────┴─────────────────────────────────────────┘
+```
+
+---
+
+## 🏗 How It Works
+```
+Worker speaks into mic
+        │
+        ▼
+ElevenLabs STT converts speech → text transcript
+        │
+        ▼
+Structured profile saved → SQLite DB + Moorcheh worker-profiles
+        │
+        ▼
+Moorcheh semantic search → matches against job-postings namespace
+        │
+        ▼
+Moorcheh AI → generates recommendations, pay analysis, contract explanations
+        │
+        ▼
+React dashboard → personalized profile + downloadable resume
+```
+
+---
+
+## 🚀 Run Locally
+
+### Backend
 ```bash
-git clone <repository-url>
+git clone https://github.com/rishabhworks/GenAIGenesis.git
 cd GenAIGenesis
+pip install -r requirements.txt
+
+# Add your keys to .env
+cp .env.example .env
+# Fill in: MOORCHEH_API_KEY, ELEVENLABS_API_KEY, GEMINI_API_KEY
+
+uvicorn app.main:app --reload --port 8000
 ```
 
-### 2. Create Virtual Environment (Python 3.12)
-
+### Load Demo Data
 ```bash
-# Create venv using Python 3.12 specifically
-py -3.12 -m venv venv
-
-# Activate virtual environment
-venv\Scripts\Activate.ps1  # PowerShell
-# OR
-source venv/bin/activate   # Linux/Mac
+python load_jobs_database.py
+python load_wage_data.py
+python load_demo_database.py
 ```
 
-### 3. Install Dependencies
-
+### Frontend
 ```bash
-# Upgrade pip first
-py -3.12 -m pip install --upgrade pip
+cd frontend
+npm install
 
-# Install requirements
-py -3.12 -m pip install -r requirements.txt
+# Create .env.local
+echo "VITE_API_BASE_URL=http://localhost:8000/api/v1" > .env.local
+
+npm run dev
 ```
 
-### 4. Configure Environment Variables
+> 🟢 Frontend runs on `http://localhost:3000`
+> 🟢 Backend runs on `http://localhost:8000`
+> 📖 API docs at `http://localhost:8000/docs`
 
-Edit `.env` and update these values:
+---
 
-```env
-# Google Gemini API (required)
-GEMINI_API_KEY=your_actual_key_from_ai.google.dev
-GEMINI_MODEL=gemini-2.5-flash
-
-# Moorcheh API (required for chatbot)
-MOORCHEH_API_KEY=your_actual_key_from_console.moorcheh.ai
-MOORCHEH_BASE_URL=https://api.moorcheh.ai/v1
-
+## 🌐 API Endpoints
 ```
-
-### 5. Load Demo Data (Optional but Recommended)
-
-Populate the knowledge base with 3 sample worker profiles:
-
-```bash
-# Load demo workers to Moorcheh
-py -3.12 load_demo_database.py
-
-# Expected output: "Successfully uploaded 3/3 workers"
-```
-
-Verify the knowledge base is populated:
-
-```bash
-# Run verification queries
-py -3.12 load_demo_database.py verify
-```
-
-### 6. Start the Server
-
-```bash
-# Development server with auto-reload
-py -3.12 -m uvicorn app.main:app --reload
-
-# Server will start at http://localhost:8000
-```
-
-### 7. Test the API
-
-#### Interactive Swagger UI (Easiest)
-- Open browser: http://localhost:8000/docs
-- Scroll to `/api/v1/chatbot/ask`
-- Click "Try it out"
-- Enter test data and execute
-
-#### Using PowerShell Script
-
-```powershell
-# Test chatbot endpoint
-$body = @{
-    "worker_id" = "worker-001"
-    "message" = "What electrician jobs match my skills?"
-} | ConvertTo-Json
-
-Invoke-RestMethod -Uri "http://localhost:8000/api/v1/chatbot/ask" `
-  -Method POST `
-  -ContentType "application/json" `
-  -Body $body
+POST   /api/v1/workers/manual-profile          →  Create worker profile
+POST   /api/v1/workers/transcribe              →  ElevenLabs STT
+PUT    /api/v1/workers/{id}                    →  Update worker profile
+POST   /api/v1/chatbot/ask                     →  AI chat assistant
+GET    /api/v1/chatbot/recommendations/{id}    →  Job recommendations
+POST   /api/v1/pay/direct-check               →  Pay fairness analysis
+POST   /api/v1/contracts/explain               →  Contract explanation
 ```
 
 ---
 
-## API Endpoints
-
-### Chatbot Endpoints
-
-#### **POST** `/api/v1/chatbot/ask`
-Ask the chatbot questions about workers in the knowledge base.
-
-**Request:**
-```json
-{
-  "worker_id": "worker-001",
-  "message": "What electrician jobs match my skills?"
-}
+## 🏆 Prize Tracks
+```
+🎯  Google Best AI for Community Impact
+💰  TD Best AI Hack to Detect Financial Fraud
+☀️  Sun Life Best Healthcare Hack Using Agentic AI
+🔵  IBM Best AI Hack using IBM Technology
+🌟  Top 2 Overall
 ```
 
-**Response:**
-```json
-{
-  "worker_id": "worker-001",
-  "user_message": "What electrician jobs match my skills?",
-  "bot_response": "Based on the knowledge base...",
-  "source": "moorcheh-rag"
-}
-```
 
-#### **GET** `/api/v1/chatbot/recommendations/{worker_id}`
-Get job recommendations for a specific worker.
+## 💡 Why This Wins
 
-**Query Parameters:**
-- `trade` (string): Worker's trade (e.g., "Electrician")
-- `experience_years` (int): Years of experience
-- `location` (string): Worker location (e.g., "Toronto, ON")
-
-**Response:**
-```json
-{
-  "worker_id": "worker-001",
-  "recommendations": [
-    {
-      "job_id": "job-123",
-      "title": "Senior Electrician",
-      "match_score": 0.95,
-      "company": "ElectroWorks"
-    }
-  ]
-}
-```
-
-#### **POST** `/api/v1/chatbot/search-workers`
-Semantic search of worker knowledge base.
-
-**Request:**
-```json
-{
-  "query": "electricians in Toronto with Red Seal certification"
-}
-```
-
-**Response:**
-```json
-{
-  "query": "electricians in Toronto...",
-  "results": [
-    {
-      "worker_id": "worker-002",
-      "relevance_score": 0.45,
-      "profile_text": "..."
-    }
-  ]
-}
-```
-
-### Legacy Endpoints (Coming Soon)
-
-- `POST /voice-profile` - Generate worker profile from voice
-- `POST /match-jobs` - Match worker to jobs  
-- `POST /pay-check` - Detect underpaid job postings
-- `POST /explain-contract` - Explain legal text in simple language
+> *Every other team in that building built for people like themselves —*
+> *tech-savvy, English-fluent, resume-polished students.*
+>
+> *We built for the guy who installs your drywall.*
+> *The woman who fixes your pipes.*
+> *The person who keeps the lights on.*
+>
+> **AI should work for everyone. Not just people who already know how to use it.**
 
 ---
 
-## Demo Data
+<div align="center">
 
-The system comes with 3 sample worker profiles (Carlos, Maria, David):
+*Built in 36 hours at GenAI Genesis 2026 🇨🇦*
 
-| Name | Trade | Experience | Location | Certifications |
-|------|-------|------------|----------|-----------------|
-| Carlos Rodriguez | Electrician | 8 years | Mississauga | Red Seal, OSHA |
-| Maria Chen | Plumber | 12 years | Toronto | Red Seal, Backflow |
-| David Thompson | HVAC | 6 years | Brampton | EPA Certified |
+*For the trades workers who keep Canada running. 🔧⚡🔩*
 
-Load with: `py -3.12 load_demo_database.py`
-
----
-
-## Troubleshooting
-
-### Python Version Issues
-```bash
-# Check Python version
-python --version
-
-# Must be Python 3.12.x
-# If you have multiple versions, use:
-py -3.12 --version
-```
-
-### API Key Errors
-- **403 Forbidden from Moorcheh**: Check that `MOORCHEH_API_KEY` is valid
-- **401 from Gemini**: Verify `GEMINI_API_KEY` is correct
-- Make sure base URL is: `https://api.moorcheh.ai/v1` (not a custom AWS URL)
-
-### Server Won't Start
-```bash
-# Kill any existing process on port 8000
-netstat -ano | findstr :8000  # Find process ID
-taskkill /PID <process_id> /F  # Kill it
-
-# Restart server
-py -3.12 -m uvicorn app.main:app --reload
-```
-
-### Knowledge Base is Empty
-```bash
-# Reload demo data
-py -3.12 load_demo_database.py
-
-# Verify it loaded
-py -3.12 load_demo_database.py verify
-```
-
----
-
-## Key Technologies & Setup Notes
-
-### Python 3.12 Requirement
-- Python 3.12 is required due to dependency compatibility (pydantic-core, httpx)
-- Python 3.14+ will cause Rust compilation errors
-- Use `py -3.12` prefix for all commands
-
-### Moorcheh RAG Setup
-- Knowledge base stored in Moorcheh cloud
-- Semantic search enabled through `https://api.moorcheh.ai/v1` endpoint
-- Worker profiles indexed for fast lookups
-- Supports up to 1M tokens per query
-
-### Gemini API Integration
-- Using `gemini-2.5-flash` model (latest available)
-- Hybrid approach: Moorcheh search + Gemini answer generation
-- Fast inference, suitable for real-time chatbot
-
----
-
-## Testing Workflow
-
-1. **Start Server**
-   ```bash
-   py -3.12 -m uvicorn app.main:app --reload
-   ```
-
-2. **Load Demo Data** (new terminal)
-   ```bash
-   py -3.12 load_demo_database.py
-   ```
-
-3. **Test Chatbot** (new terminal)
-   ```bash
-   py -3.12 test_chatbot_api.py
-   ```
-
-4. **View API Docs**
-   ```
-   http://localhost:8000/docs
-   ```
-
----
-
-## Next Steps
-
-- [ ] Implement voice-to-profile endpoint
-- [ ] Add job board data integration (LinkedIn, Indeed)
-- [ ] Implement pay fairness detection
-- [ ] Add contract explanation feature
-- [ ] Deploy to Azure Container Apps
-- [ ] Add user authentication
-- [ ] Build frontend dashboard
-
----
-
-## Support
-
-For issues or questions:
-1. Check logs: `tail -f app.log`
-2. Review `.env` configuration
-3. Verify API keys are valid
-4. Ensure Python 3.12 is being used
+</div>
