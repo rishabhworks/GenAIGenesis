@@ -1,5 +1,4 @@
-### 🦉 AI Career Agent for Skilled Trades
-### *Your voice is your resume.*
+### 🦉 WiseWorks
 
 ---
 
