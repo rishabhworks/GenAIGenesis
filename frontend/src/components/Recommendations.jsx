@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { chatbotAPI } from '../services/apiService';
 import './Recommendations.css';
 
 export default function Recommendations({ workerId }) {
-  const [recommendations, setRecommendations] = useState(null);
+  const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -11,20 +10,21 @@ export default function Recommendations({ workerId }) {
     const fetchRecommendations = async () => {
       try {
         setLoading(true);
-        const data = await chatbotAPI.getRecommendations(workerId);
+        const res = await fetch(
+          `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1'}/chatbot/recommendations/${workerId}`
+        );
+        if (!res.ok) throw new Error('Failed to fetch recommendations');
+        const data = await res.json();
         setRecommendations(data);
         setError(null);
       } catch (err) {
-        setError(err.response?.data?.detail || err.message);
-        console.error('Error fetching recommendations:', err);
+        setError(err.message);
       } finally {
         setLoading(false);
       }
     };
 
-    if (workerId) {
-      fetchRecommendations();
-    }
+    if (workerId) fetchRecommendations();
   }, [workerId]);
 
   if (loading) {
@@ -51,60 +51,33 @@ export default function Recommendations({ workerId }) {
         </div>
       )}
 
-      {recommendations && recommendations.recommendations ? (
+      {recommendations && recommendations.length > 0 ? (
         <div className="jobs-grid">
-          {recommendations.recommendations.map((job, index) => (
+          {recommendations.map((job, index) => (
             <div key={index} className="job-card">
               <div className="job-card-header">
-                <h3>{job.title}</h3>
-                <span className="match-score">{job.match_percentage || '85'}% Match</span>
+                <h3>{job.title !== 'Unknown Job' ? job.title : `Job ${job.job_id}`}</h3>
+                <span className="match-score">
+                  {Math.round(job.relevance_score * 100)}% Match
+                </span>
               </div>
 
               <div className="job-card-details">
                 <div className="detail-row">
                   <span className="detail-label">🏢 Company:</span>
-                  <span className="detail-value">{job.company || 'Not specified'}</span>
+                  <span className="detail-value">
+                    {job.company !== 'Unknown Company' ? job.company : 'See listing'}
+                  </span>
                 </div>
-
                 <div className="detail-row">
                   <span className="detail-label">📍 Location:</span>
-                  <span className="detail-value">{job.location || 'Not specified'}</span>
+                  <span className="detail-value">{job.location}</span>
                 </div>
-
                 <div className="detail-row">
                   <span className="detail-label">💰 Rate:</span>
-                  <span className="detail-value">${job.hourly_rate || 'TBD'}/hr</span>
-                </div>
-
-                <div className="detail-row">
-                  <span className="detail-label">⏰ Experience:</span>
-                  <span className="detail-value">{job.required_experience_years || '0'}+ years</span>
-                </div>
-
-                <div className="detail-row">
-                  <span className="detail-label">📋 Type:</span>
-                  <span className="detail-value">{job.job_type || 'Full-time'}</span>
+                  <span className="detail-value">${job.hourly_rate}/hr</span>
                 </div>
               </div>
-
-              {job.description && (
-                <div className="job-description">
-                  <p>{job.description}</p>
-                </div>
-              )}
-
-              {job.required_certifications && job.required_certifications.length > 0 && (
-                <div className="certifications">
-                  <p className="cert-label">Required Certifications:</p>
-                  <div className="cert-badges">
-                    {job.required_certifications.map((cert, idx) => (
-                      <span key={idx} className="cert-badge">
-                        {cert}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               <button className="apply-button">Apply Now</button>
             </div>
@@ -113,7 +86,7 @@ export default function Recommendations({ workerId }) {
       ) : (
         <div className="no-recommendations">
           <p>👀 No recommendations available yet.</p>
-          <p>Try asking the chatbot about job opportunities!</p>
+          <p>Complete your profile to get personalized job matches!</p>
         </div>
       )}
     </div>

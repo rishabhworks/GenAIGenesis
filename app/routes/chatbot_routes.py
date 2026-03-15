@@ -185,15 +185,37 @@ async def get_job_recommendations(
 
         result = []
         for rec in recommendations:
-            metadata = rec.get("metadata", {})
+            job_text = rec.get("job_details", "")
+
+            title = "Unknown Job"
+            company = "Unknown Company"
+            location_val = "Canada"
+            hourly_rate = 0.0
+
+            for line in job_text.split('\n'):
+                line = line.strip()
+                if line.startswith("Job Title:"):
+                    title = line.replace("Job Title:", "").strip()
+                elif line.startswith("Company:"):
+                    company = line.replace("Company:", "").strip()
+                elif line.startswith("Location:"):
+                    location_val = line.replace("Location:", "").strip()
+                elif line.startswith("Hourly Rate:"):
+                    try:
+                        hourly_rate = float(
+                            line.replace("Hourly Rate:", "").replace("$", "").strip()
+                        )
+                    except ValueError:
+                        hourly_rate = 0.0
+
             result.append(
                 JobRecommendation(
                     job_id=rec.get("job_id", ""),
                     relevance_score=rec.get("relevance_score", 0),
-                    title=metadata.get("title", "Unknown Job"),
-                    company=metadata.get("company", "Unknown Company"),
-                    location=metadata.get("location", "Unknown Location"),
-                    hourly_rate=metadata.get("hourly_rate", 0)
+                    title=title,
+                    company=company,
+                    location=location_val,
+                    hourly_rate=hourly_rate
                 )
             )
         return result
