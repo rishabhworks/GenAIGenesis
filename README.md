@@ -144,7 +144,7 @@ POST   /api/v1/workers/transcribe              →  ElevenLabs STT
 PUT    /api/v1/workers/{id}                    →  Update worker profile
 POST   /api/v1/chatbot/ask                     →  AI chat assistant
 GET    /api/v1/chatbot/recommendations/{id}    →  Job recommendations
-POST   /api/v1/pay/direct-check               →  Pay fairness analysis
+POST   /api/v1/pay/direct-check                →  Pay fairness analysis
 POST   /api/v1/contracts/explain               →  Contract explanation
 ```
 
