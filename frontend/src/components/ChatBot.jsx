@@ -51,7 +51,7 @@ export default function ChatBot({ workerId }) {
     {
       id: 1,
       type: 'bot',
-      content: 'Hello! I\'m your TradePass job matching assistant. Ask me about jobs that match your skills, or let me help you find opportunities!',
+      content: 'Hello! I\'m your WiseWorks job matching assistant. Ask me about jobs that match your skills, or let me help you find opportunities!',
       timestamp: new Date(),
     },
   ]);

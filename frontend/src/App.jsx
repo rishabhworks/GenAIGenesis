@@ -4,6 +4,7 @@ import Recommendations from './components/Recommendations';
 import WorkerSearch from './components/WorkerSearch';
 import PayCheck from './components/PayCheck';
 import ContractExplainer from './components/ContractExplainer';
+import Resume from './components/Resume';
 import './App.css';
 
 function App() {
@@ -28,7 +29,7 @@ function App() {
       <header className="app-header">
         <div className="header-content">
           <div className="logo-section">
-            <h1>⚡ TradePass</h1>
+            <h1><span className="logo-wise">WISE</span><span className="logo-works">WORKS</span></h1>
             <p>AI-Powered Job Matching for Skilled Trades</p>
           </div>
           <button
@@ -114,6 +115,12 @@ function App() {
         >
           📋 Contracts
         </button>
+        <button
+          className={`nav-item ${activeTab === 'resume' ? 'active' : ''}`}
+          onClick={() => setActiveTab('resume')}
+        >
+          📄 Resume
+        </button>
       </nav>
 
       <main className="app-content">
@@ -122,10 +129,22 @@ function App() {
         {activeTab === 'search' && <WorkerSearch />}
         {activeTab === 'paycheck' && <PayCheck />}
         {activeTab === 'contracts' && <ContractExplainer />}
+        {activeTab === 'resume' && <Resume workerId={workerId} profile={{
+          name: 'Carlos Rodriguez',
+          trade: 'Electrician',
+          email: 'carlos@email.com',
+          phone: '(416) 555-1234',
+          location: 'Toronto, Ontario',
+          availability: 'Full-time',
+          experience_years: 8,
+          hourly_rate_expectation: 38,
+          skill_summary: 'Licensed Red Seal electrician with 8 years of residential and commercial experience across the GTA. Specialized in panel upgrades, code compliance, and solar installation.',
+          specialties: ['Red Seal Certification', 'Residential Wiring', 'Panel Upgrades', 'Solar Installation', 'Code Compliance', 'WHMIS 2015'],
+          }} />}
       </main>
 
       <footer className="app-footer">
-        <p>&copy; 2026 TradePass - Job Matching Platform. All rights reserved.</p>
+       <p>&copy; 2026 WiseWorks — AI Career Agent for Skilled Trades. Built at GenAI Genesis 🇨🇦</p>
       </footer>
     </div>
   );
