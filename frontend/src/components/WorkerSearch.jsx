@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { chatbotAPI } from '../services/apiService';
 import './WorkerSearch.css';
 
 export default function WorkerSearch() {
@@ -15,11 +14,20 @@ export default function WorkerSearch() {
     try {
       setLoading(true);
       setError(null);
-      const data = await chatbotAPI.searchWorkers(searchQuery);
+      setResults(null);
+
+      const url = new URL(
+        `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1'}/chatbot/search-workers`
+      );
+      url.searchParams.append('query', searchQuery);
+      url.searchParams.append('top_k', '5');
+
+      const res = await fetch(url.toString(), { method: 'POST' });
+      if (!res.ok) throw new Error('Search failed');
+      const data = await res.json();
       setResults(data);
     } catch (err) {
-      setError(err.response?.data?.detail || err.message);
-      console.error('Error searching workers:', err);
+      setError(err.message || 'Search failed');
     } finally {
       setLoading(false);
     }
@@ -53,12 +61,25 @@ export default function WorkerSearch() {
 
       {results && (
         <div className="search-results">
-          <h3>Search Results</h3>
+          <h3>Search Results ({results.result_count || 0} found)</h3>
           <div className="results-content">
-            {typeof results === 'string' ? (
-              <p>{results}</p>
+            {results.results && results.results.length > 0 ? (
+              results.results.map((r, i) => (
+                <div key={i} style={{
+                  padding: '12px 0',
+                  borderBottom: '1px solid #1A2535',
+                  color: '#A0B0C0',
+                  fontSize: '0.875rem',
+                  lineHeight: '1.6'
+                }}>
+                  <p style={{ color: '#22A8BE', fontWeight: '600', marginBottom: '4px' }}>
+                    Worker {r.worker_id?.slice(0, 8) || i + 1}
+                  </p>
+                  <p style={{ whiteSpace: 'pre-wrap' }}>{r.text}</p>
+                </div>
+              ))
             ) : (
-              <pre>{JSON.stringify(results, null, 2)}</pre>
+              <p style={{ color: '#3A4F65' }}>No workers found matching your search.</p>
             )}
           </div>
         </div>
@@ -66,22 +87,13 @@ export default function WorkerSearch() {
 
       <div className="suggested-searches">
         <p>Try:</p>
-        <button
-          onClick={() => setSearchQuery('Electrician with 5+ years experience')}
-          className="suggestion"
-        >
+        <button onClick={() => setSearchQuery('Electrician with 5+ years experience')} className="suggestion">
           Electrician 5+ years
         </button>
-        <button
-          onClick={() => setSearchQuery('Master plumber in Toronto')}
-          className="suggestion"
-        >
+        <button onClick={() => setSearchQuery('Master plumber in Toronto')} className="suggestion">
           Master plumber
         </button>
-        <button
-          onClick={() => setSearchQuery('HVAC technician with EPA certification')}
-          className="suggestion"
-        >
+        <button onClick={() => setSearchQuery('HVAC technician with EPA certification')} className="suggestion">
           HVAC with EPA cert
         </button>
       </div>
